@@ -26,6 +26,8 @@ if (
 
 	// Object Storage
 	!isset($_ENV["USE_OBJECT_STORAGE"]) || empty($_ENV["USE_OBJECT_STORAGE"]) || 
+		!isset($_ENV["SET_STORAGE"]) || empty($_ENV["SET_STORAGE"]) || 
+	!isset($_ENV["AWS_S3_CDN_ENDPOINT"]) || empty($_ENV["AWS_S3_CDN_ENDPOINT"]) || 
 	!isset($_ENV["AWS_S3_ENDPOINT"]) || empty($_ENV["AWS_S3_ENDPOINT"]) || 
 	!isset($_ENV["AWS_S3_REGION"]) || empty($_ENV["AWS_S3_REGION"]) || 
 	!isset($_ENV["AWS_S3_KEY"]) || empty($_ENV["AWS_S3_KEY"]) || 
@@ -43,7 +45,9 @@ if (
 }
 
 define('SITE_ADDRESS', $_ENV["APP_URL"]);
+define('SITE_ADDRESS2', $_ENV["APP_URL"]);
 define('DOCROOT', $_ENV["DOCROOT"]);
+define('DOCROOT2', $_ENV["DOCROOT2"]);
 define('SITE_NAME', $_ENV["APP_NAME"]);
 
 define('DB_HOST', $_ENV["DB_HOST"]);
@@ -52,7 +56,9 @@ define('DB_PASSWORD', $_ENV["DB_PASSWORD"]);
 define('DB_NAME', $_ENV["DB_NAME"]);
 
 define('USE_OBJECT_STORAGE', $_ENV["USE_OBJECT_STORAGE"]);
+define('SET_STORAGE', $_ENV["SET_STORAGE"]);
 define('AWS_S3_ENDPOINT', $_ENV["AWS_S3_ENDPOINT"]);
+define('AWS_S3_CDN_ENDPOINT', $_ENV["AWS_S3_CDN_ENDPOINT"]);
 define('AWS_S3_REGION', $_ENV["AWS_S3_REGION"]);
 define('AWS_S3_KEY', $_ENV["AWS_S3_KEY"]);
 define('AWS_S3_SECRET', $_ENV["AWS_S3_SECRET"]);
@@ -61,5 +67,40 @@ define('AWS_S3_BUCKET_PUT', $_ENV["AWS_S3_BUCKET_PUT"]);
 define('AWS_S3_BUCKET_GET', $_ENV["AWS_S3_BUCKET_GET"]);
 define('AWS_S3_DIR', $_ENV["AWS_S3_DIR"]);
 
-//var_dump(get_defined_constants(true)['user']);exit;
+// Firebase Configuration
+if (isset($_ENV["FIREBASE_TYPE"]) && !empty($_ENV["FIREBASE_TYPE"])) {
+    define('FIREBASE_TYPE', $_ENV["FIREBASE_TYPE"]);
+}
+if (isset($_ENV["FIREBASE_PROJECT_ID"]) && !empty($_ENV["FIREBASE_PROJECT_ID"])) {
+    define('FIREBASE_PROJECT_ID', $_ENV["FIREBASE_PROJECT_ID"]);
+}
+if (isset($_ENV["FIREBASE_PRIVATE_KEY_ID"]) && !empty($_ENV["FIREBASE_PRIVATE_KEY_ID"])) {
+    define('FIREBASE_PRIVATE_KEY_ID', $_ENV["FIREBASE_PRIVATE_KEY_ID"]);
+}
+if (isset($_ENV["FIREBASE_PRIVATE_KEY"]) && !empty($_ENV["FIREBASE_PRIVATE_KEY"])) {
+    define('FIREBASE_PRIVATE_KEY', $_ENV["FIREBASE_PRIVATE_KEY"]);
+}
+if (isset($_ENV["FIREBASE_CLIENT_EMAIL"]) && !empty($_ENV["FIREBASE_CLIENT_EMAIL"])) {
+    define('FIREBASE_CLIENT_EMAIL', $_ENV["FIREBASE_CLIENT_EMAIL"]);
+}
+if (isset($_ENV["FIREBASE_CLIENT_ID"]) && !empty($_ENV["FIREBASE_CLIENT_ID"])) {
+    define('FIREBASE_CLIENT_ID', $_ENV["FIREBASE_CLIENT_ID"]);
+}
+if (isset($_ENV["FIREBASE_AUTH_URI"]) && !empty($_ENV["FIREBASE_AUTH_URI"])) {
+    define('FIREBASE_AUTH_URI', $_ENV["FIREBASE_AUTH_URI"]);
+}
+if (isset($_ENV["FIREBASE_TOKEN_URI"]) && !empty($_ENV["FIREBASE_TOKEN_URI"])) {
+    define('FIREBASE_TOKEN_URI', $_ENV["FIREBASE_TOKEN_URI"]);
+}
+if (isset($_ENV["FIREBASE_AUTH_PROVIDER_CERT_URL"]) && !empty($_ENV["FIREBASE_AUTH_PROVIDER_CERT_URL"])) {
+    define('FIREBASE_AUTH_PROVIDER_CERT_URL', $_ENV["FIREBASE_AUTH_PROVIDER_CERT_URL"]);
+}
+if (isset($_ENV["FIREBASE_CLIENT_CERT_URL"]) && !empty($_ENV["FIREBASE_CLIENT_CERT_URL"])) {
+    define('FIREBASE_CLIENT_CERT_URL', $_ENV["FIREBASE_CLIENT_CERT_URL"]);
+}
+if (isset($_ENV["FIREBASE_UNIVERSE_DOMAIN"]) && !empty($_ENV["FIREBASE_UNIVERSE_DOMAIN"])) {
+    define('FIREBASE_UNIVERSE_DOMAIN', $_ENV["FIREBASE_UNIVERSE_DOMAIN"]);
+}
+
+
 ?>
