@@ -13,26 +13,46 @@ $_REQUEST = array_merge($_REQUEST, $request ?? []);
 $token = $_REQUEST['token'] ?? '';
 
 try {
+		$PROPERTY_ARR = [];
+		$query = " SELECT 
+		p.iPropertyID AS id,
+		p.vName AS propertyName,
+		c.vName AS category,
+		pt.vName AS propertyType,
+		p.fCarpetArea AS carpetArea,
+		p.fBaseAmount AS monthlyRent,
+		p.vPic AS propertyImg,
 
-	// Build property map
-	$PROPERTY_ARR = [];
-	$query = " SELECT p.iPropertyID AS id, p.vName AS propertyName, c.vName AS category, pt.vName AS propertyType, p.fCarpetArea AS carpetArea, fBaseAmount AS monthlyRent, p.vPic AS propertyImg
-		FROM property AS p
-		JOIN category AS c ON p.iCategoryID = c.iCategoryID
-		JOIN property_type AS pt ON p.iPropertyTypeID = pt.iPropertyTypeID
-		ORDER BY p.iPropertyID,
+		t.vParty AS tenantName,
+		t.vPic AS tenantImg
+
+	FROM property p
+	JOIN category c ON p.iCategoryID = c.iCategoryID
+	JOIN property_type pt ON p.iPropertyTypeID = pt.iPropertyTypeID
+
+	LEFT JOIN agreement a 
+		ON a.iPropertyID = p.iPropertyID 
+		AND a.cStatus = 'A'
+
+	LEFT JOIN tenant t 
+		ON t.iTenantID = a.iTenantID 
+		AND t.cStatus = 'A'
+
+	ORDER BY p.iPropertyID ASC
 	";
 	$res = sql_query($query);
 	$properties = [];
 	while ($data = sql_fetch_assoc($res)) {
 		$properties[] = array(
-			"id" => (int)$data['id'],
+			"propId" => (int)$data['id'],
 			"propertyName" => $data['propertyName'],
 			"category" => $data['category'],
 			"propertyType" => $data['propertyType'],
 			"carpetArea" => (float)$data['carpetArea'],
 			"monthlyRent" => (float)$data['monthlyRent'],
 			"propertyImg" => $data['propertyImg'],
+			"tenantName" => $data['tenantName'],
+			"tenantImg" => $data['tenantImg'],
 		);
 	}
 
