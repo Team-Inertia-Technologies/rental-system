@@ -74,7 +74,7 @@ try{
 } catch (Exception $e) {
 	$response = array(
 		"error" => array(
-			"message" => $e->getMessage(),
+			"message" => "Internal Server Error",
 		),
 		"statusCode" => 500,
 	);
