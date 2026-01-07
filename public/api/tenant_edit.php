@@ -22,7 +22,6 @@ $type = isset($_REQUEST['type']) ? (int)$_REQUEST['type'] : 0;
 $agreement = isset($_REQUEST['agreement']) ? (int)$_REQUEST['agreement'] : 0;
 
 try {
-	// Update tenant details
 	$updateQuery = "UPDATE tenant SET 
 		vParty = '" . db_input($name) . "',
 		vPartyContactNo = '" . db_input($mobile) . "',
@@ -33,8 +32,6 @@ try {
 		WHERE iTenantID = $tenantId AND cStatus = 'A'";
 
 	sql_query($updateQuery);
-
-	// Optionally update agreement if provided
 	if ($agreement > 0) {
 		$agreementUpdateQuery = "UPDATE agreement SET 
 			iTenantID = $tenantId
