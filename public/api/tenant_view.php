@@ -11,6 +11,7 @@ $request = json_decode($postdata, true);
 $_REQUEST = array_merge($_REQUEST, $request ?? []);
 
 $token = $_REQUEST['token'] ?? '';
+$tenantId = isset($_REQUEST['tenantId']) ? (int)$_REQUEST['tenantId'] : 0;
 
 try{
 	$query = "SELECT 
@@ -46,8 +47,8 @@ try{
 				"panNumer"       => $row['vPanNo'],
 				"tenentImg"      => $row['tenantImg'],
 				"contactPerson"  => $row['vParty'],
-				"status" => 'Paid',
-				"properties"     => []
+				"properties"     => [],
+				"type"=> 1
 			];
 		}
 
@@ -62,7 +63,11 @@ try{
 	$tenants = array_values($tenants);
 	$response = array(
 		"data" => array(
-			"tenantList" => $tenants,
+			"tenantInfo" => $tenants,
+			"typeOptArr" => [
+				["id" => 1, "name" => "Individual"],
+				["id" => 2, "name" => "Entity"]
+			],
 		),
 		"statusCode" => 200,
 	);
@@ -74,12 +79,11 @@ try{
 } catch (Exception $e) {
 	$response = array(
 		"error" => array(
-			"message" => $e->getMessage(),
+			"message" => "Internal Server Error",
 		),
 		"statusCode" => 500,
 	);
 	http_response_code(500);
-	header('Content-Type: application/json');
 	echo json_encode($response);
 	exit;
 }
