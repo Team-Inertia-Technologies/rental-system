@@ -22,22 +22,13 @@ try {
 		p.fCarpetArea AS carpetArea,
 		p.fBaseAmount AS monthlyRent,
 		p.vPic AS propertyImg,
-
 		t.vParty AS tenantName,
 		t.vPic AS tenantImg
-
 	FROM property p
 	JOIN category c ON p.iCategoryID = c.iCategoryID
 	JOIN property_type pt ON p.iPropertyTypeID = pt.iPropertyTypeID
-
-	LEFT JOIN agreement a 
-		ON a.iPropertyID = p.iPropertyID 
-		AND a.cStatus = 'A'
-
-	LEFT JOIN tenant t 
-		ON t.iTenantID = a.iTenantID 
-		AND t.cStatus = 'A'
-
+	LEFT JOIN agreement a ON a.iPropertyID = p.iPropertyID AND a.cStatus = 'A'
+	LEFT JOIN tenant t ON t.iTenantID = a.iTenantID AND t.cStatus = 'A'
 	ORDER BY p.iPropertyID ASC
 	";
 	$res = sql_query($query);
