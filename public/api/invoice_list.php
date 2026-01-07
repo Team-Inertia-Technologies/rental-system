@@ -45,6 +45,13 @@ try{
 	$response = array(
 		"data" => array(
 			"invoices" => $invoices,
+			"filterOptsArr" => [
+					["val" => "A", "name" => "All"],
+					["val" => "P", "name" => "Paid"],
+					["val" => "S", "name" => "Sent"],
+					["val" => "D", "name" => "Draft"],
+					["val" => "O", "name" => "Overdue"],
+			],
 		),
 		"statusCode" => 200,
 	);
