@@ -13,33 +13,52 @@ $_REQUEST = array_merge($_REQUEST, $request ?? []);
 $token = $_REQUEST['token'] ?? '';
 
 try{
-	$query = " SELECT 
-		t.iTenantID AS id,
+	$query = "SELECT 
+		t.iTenantID AS tenantId,
 		t.vParty AS tenantName,
 		t.vPic AS tenantImg,
-		t.vContactPerson,
 		t.vContactNo,
 		t.vEmailID,
 		t.vGSTNo,
-		t.vParty
+		t.vPanNo,
+		t.vParty,
+		a.iAgreementID,
+		a.iPropertyID,
+		p.vName AS PropertyName
 	FROM tenant t
+	LEFT JOIN agreement a ON a.iTenantID = t.iTenantID
+	LEFT JOIN property p ON p.iPropertyID = a.iPropertyID
 	WHERE t.cStatus = 'A'
 	";
+
 	$res = sql_query($query);
 	$tenants = [];
-	while ($data = sql_fetch_assoc($res)) {
-		$tenants[] = array(
-			"tenantId" => (int)$data['id'],
-			"name" => $data['tenantName'],
-			"mobile" => $data['vContactNo'],
-			"email" => $data['vEmailID'],
-			"gstNumber" => $data['vGSTNo'],
-			"tenentImg" => $data['tenantImg'],
-			"contactPerson" => $data['vParty'],
-			"properties" => [],
-		);
+
+	while ($row = sql_fetch_assoc($res)) {
+		$tenantId = (int)$row['tenantId'];
+		if (!isset($tenants[$tenantId])) {
+			$tenants[$tenantId] = [
+				"tenantId"       => $tenantId,
+				"name"           => $row['tenantName'],
+				"mobile"         => $row['vContactNo'],
+				"email"          => $row['vEmailID'],
+				"gstNumber"      => $row['vGSTNo'],
+				"panNumer"       => $row['vPanNo'],
+				"tenentImg"      => $row['tenantImg'],
+				"contactPerson"  => $row['vParty'],
+				"properties"     => []
+			];
+		}
+
+		if (!empty($row['iAgreementID'])) {
+			$tenants[$tenantId]['properties'][] = [
+				"propertyId"  => (int)$row['iPropertyID'],
+				"propertyName"=> $row['PropertyName']
+			];
+		}
 	}
 
+	$tenants = array_values($tenants);
 	$response = array(
 		"data" => array(
 			"tenantList" => $tenants,
