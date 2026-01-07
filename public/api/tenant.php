@@ -17,11 +17,11 @@ try{
 		t.iTenantID AS tenantId,
 		t.vParty AS tenantName,
 		t.vPic AS tenantImg,
-		t.vContactNo,
-		t.vEmailID,
+		t.vPartyContactNo,
+		t.vPartyEmailID,
 		t.vGSTNo,
 		t.vPanNo,
-		t.vParty,
+		t.vContactPerson,
 		a.iAgreementID,
 		a.iPropertyID,
 		p.vName AS PropertyName
@@ -40,12 +40,12 @@ try{
 			$tenants[$tenantId] = [
 				"tenantId"       => $tenantId,
 				"name"           => $row['tenantName'],
-				"mobile"         => $row['vContactNo'],
-				"email"          => $row['vEmailID'],
+				"mobile"         => $row['vPartyContactNo'],
+				"email"          => $row['vPartyEmailID'],
 				"gstNumber"      => $row['vGSTNo'],
 				"panNumer"       => $row['vPanNo'],
 				"tenentImg"      => $row['tenantImg'],
-				"contactPerson"  => $row['vParty'],
+				"contactPerson"  => $row['vContactPerson'],
 				"status" => 'Paid',
 				"properties"     => []
 			];
