@@ -11,6 +11,7 @@ $request = json_decode($postdata, true);
 $_REQUEST = array_merge($_REQUEST, $request ?? []);
 
 $token = $_REQUEST['token'] ?? '';
+$propId = isset($_REQUEST['propId']) ? (int)$_REQUEST['propId'] : 0;
 
 try{
 
@@ -44,8 +45,47 @@ try{
 		);
 	}
 
+	$propertyQuery = " SELECT 
+		p.iPropertyID AS id,
+		p.vName AS propertyName,
+		p.vAddress AS address,
+		c.iCategoryID AS categoryId,
+		pt.iPropertyTypeID AS typeId,
+		p.fCarpetArea AS carpetArea,
+		p.fBuiltArea AS builtUpArea
+		a.dFrom,
+		a.dTo,
+		a.fAmount,
+		a.vAgreementDoc,
+		a.iTenantID,
+		t.vParty
+	FROM property p
+	JOIN category c ON p.iCategoryID = c.iCategoryID
+	JOIN property_type pt ON p.iPropertyTypeID = pt.iPropertyTypeID
+	LEFT JOIN agreement a ON a.iPropertyID = p.iPropertyID
+	LEFT JOIN tenant t ON t.iTenantID = a.iTenantID
+	WHERE p.iPropertyID = $propId
+	";
+	$propertyRes = sql_query($propertyQuery);
+	$propertyData = sql_fetch_assoc($propertyRes);
+	
 	$response = array(
 		"data" => array(
+			"propertyDetails" => array(
+				"propId" => (int)$propertyData['id'],
+				"name" => $propertyData['propertyName'],
+				"address" => $propertyData['address'],
+				"category" => (int)$propertyData['categoryId'],
+				"type" => (int)$propertyData['typeId'],
+				"carpetArea" => (float)$propertyData['carpetArea'],
+				"builtUpArea" => (float)$propertyData['builtUpArea'],
+				"tenantId" => (int)$propertyData['iTenantID'],
+				"tenantName" => $propertyData['vParty'],
+				"monthlyRent" => (float)$propertyData['fAmount'],
+				"leaseStart" => $propertyData['dFrom'],
+				"leaseEnd" => $propertyData['dTo'],
+				"agreementdoc" => $propertyData['vAgreementDoc'],
+			),
 			"categoryArr" => $categories,
 			"tenantArr" => $tenants,
 			"propertyTypeArr" => $propertytypes,
