@@ -45,11 +45,11 @@ $userid = DecodeParam($token);
 try {
 
 	if ($mode === 'INSERT') {
-		$tenantId = NextID("iTenantID", "tenant");
+		$Id = NextID("iTenantID", "tenant");
 		$insertQuery = "INSERT INTO tenant 
 			(iTenantID, iUID, vParty, vPartyContactNo, vPartyEmailID, vGSTNo, vPanNo, vContactPerson, iType, cStatus) 
 			VALUES (
-				$tenantId,
+				$Id,
 				$userid,
 				'" . db_input($name) . "',
 				'" . db_input($mobile) . "',
@@ -65,7 +65,7 @@ try {
 
 		$response = array(
 			"data" => array(
-				"tenantId" => $tenantId,
+				"tenantId" => $Id,
 				"message" => "Tenant added successfully"
 			),
 			"statusCode" => 200
