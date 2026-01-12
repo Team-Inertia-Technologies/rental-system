@@ -31,6 +31,20 @@ if (!in_array($mode, ['INSERT', 'UPDATE'])) {
     exit;
 }
 
+if (!$token) {
+    http_response_code(400);
+    header('Content-Type: application/json');
+    echo json_encode([
+        "statusCode" => 400,
+        "error" => [
+            "message" => "Missing token "
+        ]
+    ]);
+    exit;
+}
+
+$userid = DecodeParam($token); 
+
 try {
 
     /* ===============================
@@ -42,9 +56,10 @@ try {
 
         $insertProperty = "
             INSERT INTO property
-            (iPropertyID, vName, vAddress, iCategoryID, iPropertyTypeID, fCarpetArea, fBuiltArea)
+            (iPropertyID, iUID, vName, vAddress, iCategoryID, iPropertyTypeID, fCarpetArea, fBuiltArea)
             VALUES (
                 $propId,
+                $userid,
                 '".db_input($name)."',
                 '".db_input($address)."',
                 $category,
@@ -64,13 +79,14 @@ try {
 
             $insertAgreement = "
                 INSERT INTO agreement
-                (iAgreementID, dtAgreement, dAgreementDate, iPropertyID, iTenantID,
+                (iAgreementID, dtAgreement, dAgreementDate, iPropertyID, iUID, iTenantID,
                  iPropertyTypeID, fAmount, dFrom, dTo, vAgreementDoc)
                 VALUES (
                     $agreementId,
                     '$now',
                     '$now',
                     $propId,
+                    $userid,
                     $tenantId,
                     $type,
                     $monthlyRent,

@@ -28,14 +28,29 @@ if (!in_array($mode, ['INSERT', 'UPDATE'])) {
     exit;
 }
 
+if (!$token) {
+    http_response_code(400);
+    header('Content-Type: application/json');
+    echo json_encode([
+        "statusCode" => 400,
+        "error" => [
+            "message" => "Missing token "
+        ]
+    ]);
+    exit;
+}
+
+$userid = DecodeParam($token); 
+
 try {
 
 	if ($mode === 'INSERT') {
 		$tenantId = NextID("iTenantID", "tenant");
 		$insertQuery = "INSERT INTO tenant 
-			(iTenantID, vParty, vPartyContactNo, vPartyEmailID, vGSTNo, vPanNo, vContactPerson, iType, cStatus) 
+			(iTenantID, iUID, vParty, vPartyContactNo, vPartyEmailID, vGSTNo, vPanNo, vContactPerson, iType, cStatus) 
 			VALUES (
 				$tenantId,
+				$userid,
 				'" . db_input($name) . "',
 				'" . db_input($mobile) . "',
 				'" . db_input($email) . "',
