@@ -19,7 +19,7 @@ try {
 		i.vInvoiceNo AS invoiceNo,
 		i.dInvoiceDate AS invoiceDate,
 		i.fTotal AS totalAmount,
-		i.cStatus AS status,
+		i.vPayStatus AS status,
 		p.vName AS propertyName,
 		t.vParty AS tenantName,
 		i.tDetails AS details
@@ -36,7 +36,7 @@ try {
 			"date" => $data['invoiceDate'],
 			"total" => (float)$data['totalAmount'],
 			"status" => $data['status'],
-			"statusText"=> 'Paid',
+			"statusText"=> $data['status'],
 			"propertyName" => $data['propertyName'],
 			"tenantName" => $data['tenantName'],
 			"details" => $data['details'],
