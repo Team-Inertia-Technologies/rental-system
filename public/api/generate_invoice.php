@@ -15,6 +15,7 @@ $propId = isset($_REQUEST['propId']) ? (int)$_REQUEST['propId'] : 0;
 
 if (!$token) {
     http_response_code(400);
+	header('Content-Type: application/json');
     echo json_encode([
         "statusCode" => 400,
         "error" => [
@@ -29,6 +30,7 @@ try{
 	// Simulate invoice generation logic
 	if ($propId <= 0) {
 		http_response_code(400);
+		header('Content-Type: application/json');
 		echo json_encode([
 			"statusCode" => 400,
 			"error" => [
@@ -57,6 +59,7 @@ try{
 	$data = sql_fetch_assoc($res);
 	if (!$data) {
 		http_response_code(404);
+		header('Content-Type: application/json');
 		echo json_encode([
 			"statusCode" => 404,
 			"error" => [
@@ -79,9 +82,19 @@ try{
 		"tenantName" => $data['tenantName'],
 	];
 
+	http_response_code(200);
+	header('Content-Type: application/json');
+	echo json_encode([
+		"statusCode" => 200,
+		"data" => [
+			"invoice" => $invoice
+		]
+	]);
+
 } catch (Exception $e) {
 
     http_response_code(500);
+	header('Content-Type: application/json');
     echo json_encode([
         "error" => [
             "message" => "Internal Server Error"
