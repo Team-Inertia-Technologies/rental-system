@@ -13,6 +13,15 @@ $_REQUEST = array_merge($_REQUEST, $request ?? []);
 $token = $_REQUEST['token'] ?? '';
 $propId = isset($_REQUEST['propId']) ? (int)$_REQUEST['propId'] : 0;
 
+if (!$token || $propId <= 0) {
+	http_response_code(400);
+	echo json_encode([
+		"statusCode" => 400,
+		"message" => "Missing token or invalid property ID"
+	]);
+	exit;
+}
+
 try {
 
 	// Fetch property details

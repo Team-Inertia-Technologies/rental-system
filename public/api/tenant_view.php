@@ -13,6 +13,18 @@ $_REQUEST = array_merge($_REQUEST, $request ?? []);
 $token = $_REQUEST['token'] ?? '';
 $tenantId = isset($_REQUEST['tenantId']) ? (int)$_REQUEST['tenantId'] : 0;
 
+if (!$token || $tenantId <= 0) {
+	http_response_code(400);
+	header('Content-Type: application/json');
+	echo json_encode([
+		"statusCode" => 400,
+		"error" => [
+			"message" => "Missing token or tenantId"
+		]
+	]);
+	exit;
+}
+
 try{
 	$query = "SELECT 
 		t.iTenantID AS tenantId,

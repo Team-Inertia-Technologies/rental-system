@@ -12,6 +12,16 @@ $_REQUEST = array_merge($_REQUEST, $request ?? []);
 
 $token = $_REQUEST['token'] ?? '';
 $invoiceId = isset($_REQUEST['invoiceId']) ? (int)$_REQUEST['invoiceId'] : 0;
+if (!$token) {
+	http_response_code(400);
+	echo json_encode([
+		"statusCode" => 400,
+		"error" => [
+			"message" => "Missing token"
+		]
+	]);
+	exit;
+}
 
 try {
 	$query = " SELECT 
