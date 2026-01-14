@@ -97,7 +97,7 @@ try{
 	header('Content-Type: application/json');
     echo json_encode([
         "error" => [
-            "message" => "Internal Server Error"
+            "message" => $e->getMessage()
         ],
         "statusCode" => 500
     ]);

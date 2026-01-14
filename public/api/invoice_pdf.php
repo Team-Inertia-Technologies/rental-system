@@ -187,7 +187,7 @@ try {
     http_response_code(500);
     echo json_encode([
         "statusCode" => 500,
-        "error" => ["message" => "Internal server error"]
+        "error" => ["message" => $e->getMessage()]
     ]);
     exit;
 }

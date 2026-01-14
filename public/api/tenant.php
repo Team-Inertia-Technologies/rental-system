@@ -34,6 +34,7 @@ try{
 		t.vGSTNo,
 		t.vPanNo,
 		t.vContactPerson,
+		t.vAddress,
 		a.iAgreementID,
 		a.iPropertyID,
 		p.vName AS PropertyName
@@ -58,6 +59,7 @@ try{
 				"panNumer"       => $row['vPanNo'],
 				"tenentImg"      => $row['tenantImg'],
 				"contactPerson"  => $row['vContactPerson'],
+				"address"        => $row['vAddress'],
 				"status" => 'Paid',
 				"properties"     => []
 			];
@@ -86,7 +88,7 @@ try{
 } catch (Exception $e) {
 	$response = array(
 		"error" => array(
-			"message" => "Internal Server Error",
+			"message" => $e->getMessage()
 		),
 		"statusCode" => 500,
 	);
