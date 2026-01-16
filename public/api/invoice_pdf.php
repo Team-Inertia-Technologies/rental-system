@@ -26,31 +26,64 @@ if (!$token) {
 
 try {
 
-   
-    $invoiceNo   = GetXFromYID("SELECT vInvoiceNo FROM invoice WHERE iInvoiceID=", $invoiceId);
-    $invoiceDate = GetXFromYID("SELECT dInvoiceDate FROM invoice WHERE iInvoiceID=", $invoiceId);
-    $tenantID   = GetXFromYID("SELECT iTenantID FROM invoice WHERE iInvoiceID=", $invoiceId);
-    $propertyid = GetXFromYID("SELECT iPropertyID FROM invoice WHERE iInvoiceID=", $invoiceId);
-    $fCGST    = GetXFromYID("SELECT fCGST FROM invoice WHERE iInvoiceID=", $invoiceId);
-    $fSGST    = GetXFromYID("SELECT fSGST FROM invoice WHERE iInvoiceID=", $invoiceId);
+    $q = "
+        SELECT
+            i.vInvoiceNo,
+            i.dInvoiceDate,
+            i.fValue,
+            i.fCGST,
+            i.fSGST,
 
+            t.vParty,
+            t.vContactPerson,
+            t.vPartyContactNo,
+            t.vPartyEmailID,
+            t.vGSTNo,
+
+            p.vName AS propertyName,
+            p.vAddress,
+            p.fCarpetArea
+
+        FROM invoice i
+        JOIN tenant t   ON i.iTenantID   = t.iTenantID
+        JOIN property p ON i.iPropertyID = p.iPropertyID
+        WHERE i.iInvoiceID = $invoiceId
+        LIMIT 1
+        ";
+
+    $res = sql_query($q);
+    $row = sql_fetch_object($res);
+
+    if (!$row) {
+        http_response_code(404);
+        echo json_encode([
+            "statusCode" => 404,
+            "error" => ["message" => "Invoice not found"]
+        ]);
+        exit;
+    }
+
+   
+    $invoiceNo   = $row->vInvoiceNo;
+    $invoiceDate = $date = date("d-m-Y", strtotime($row->dInvoiceDate));
+   
     $billing = [
-        "name"   => GetXFromYID("SELECT vParty FROM tenant WHERE iTenantID=", $tenantID),
-        "contact"=> GetXFromYID("SELECT vContactPerson FROM tenant WHERE iTenantID=", $tenantID),
-        "phone"  => GetXFromYID("SELECT vPartyContactNo FROM tenant WHERE iTenantID=", $tenantID),
-        "email"  => GetXFromYID("SELECT vPartyEmailID FROM tenant WHERE iTenantID=", $tenantID),
-        "gst"    => GetXFromYID("SELECT vGSTNo FROM tenant WHERE iTenantID=", $tenantID)
+        "name"   => $row->vParty,
+        "contact"=> $row->vContactPerson,
+        "phone"  => $row->vPartyContactNo,
+        "email"  => $row->vPartyEmailID,
+        "gst"    => $row->vGSTNo
     ];
 
     $shipping = [
-        "name"   => GetXFromYID("SELECT vName FROM property WHERE iPropertyID=", $propertyid),
-        "addr"   => GetXFromYID("SELECT vAddress FROM property WHERE iPropertyID=", $propertyid),
-        "area"   => GetXFromYID("SELECT fCarpetArea FROM property WHERE iPropertyID=", $propertyid)
+        "name"   => $row->propertyName,
+        "addr"   => $row->vAddress,
+        "area"   => $row->fCarpetArea
     ];
 
-    $amount   = GetXFromYID("SELECT fValue FROM invoice WHERE iInvoiceID=", $invoiceId);
-    $cgst     = $amount * $fCGST;
-    $sgst     = $amount * $fSGST;
+    $amount   = (float)$row->fValue;
+    $cgst     = $amount * $row->fCGST;
+    $sgst     = $amount * $row->fSGST;
     $total    = $amount + $cgst + $sgst;
 
     /* ---------------------------
