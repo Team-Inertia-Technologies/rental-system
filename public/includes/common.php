@@ -42,6 +42,5 @@ if ($logged) {
 }
 
 
-$PAGE_TITLE = "Deltin App | ";
-
+$PAGE_TITLE = "MAN MY RENT";
 ?>
