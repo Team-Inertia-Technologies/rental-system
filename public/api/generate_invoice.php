@@ -68,18 +68,35 @@ try{
 		]);
 		exit;
 	}
+	$tenantId = (int)$data['iTenantID'];
+	$propertyId = (int)$data['iPropertyID'];
+
+	$invoiceCheckQuery = "
+		SELECT iInvoiceID
+		FROM invoice
+		WHERE iTenantID = $tenantId
+		AND iPropertyID = $propertyId
+		LIMIT 1
+	";
+
+	$invoiceCheckRes = sql_query($invoiceCheckQuery);
+	$invoiceExists = (sql_num_rows($invoiceCheckRes) > 0);
+
 	$invoiceNumber = "INV-" . date('Y') . "-" . rand(100000, 999999);
 	$invoice = [
 		"invoiceNumber" => $invoiceNumber,
 		"agreementId" => (int)$data['iAgreementID'],
 		"date" => $data['dAgreementDate'],
 		"rent" => (float)$data['fAmount'],
+		"gst" => round(((float)$data['fAmount'] * 18) / 100, 2),
+		"totalAmount" => round(((float)$data['fAmount'] * 118) / 100, 2),
 		"invoiceperiodFrom" => $data['dFrom'],
 		"invoiceperiodTo" => $data['dTo'],
 		"propId" => (int)$data['iPropertyID'],
 		"propertyName" => $data['propertyName'],
 		"tenantId" => (int)$data['iTenantID'],
 		"tenantName" => $data['tenantName'],
+		"savedraft" => $invoiceExists
 	];
 
 	http_response_code(200);
