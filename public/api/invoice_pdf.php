@@ -13,7 +13,7 @@ $request  = json_decode($postdata, true);
 $_REQUEST = array_merge($_REQUEST, $request ?? []);
 
 $token = $_REQUEST['token'] ?? '';
-$invoiceId = isset($_REQUEST['invoiceId']) ? (int)$_REQUEST['invoiceId'] : 0;
+$propId = isset($_REQUEST['propId']) ? (int)$_REQUEST['propId'] : 0;
 
 if (!$token) {
     http_response_code(400);
@@ -47,7 +47,7 @@ try {
         FROM invoice i
         JOIN tenant t   ON i.iTenantID   = t.iTenantID
         JOIN property p ON i.iPropertyID = p.iPropertyID
-        WHERE i.iInvoiceID = $invoiceId
+        WHERE i.iPropertyID = $propId
         LIMIT 1
         ";
 
@@ -64,7 +64,12 @@ try {
     }
 
    
-    $invoiceNo   = $row->vInvoiceNo;
+    if (!empty($row) && isset($row->vInvoiceNo) && trim($row->vInvoiceNo) !== '') {
+        $invoiceNo = $row->vInvoiceNo;
+    } else {
+        $invoiceNo = "INV-" . date('Y') . "-" . rand(100000, 999999);
+    }
+    
     $invoiceDate = $date = date("d-m-Y", strtotime($row->dInvoiceDate));
    
     $billing = [
@@ -117,8 +122,6 @@ try {
             <td>
                 <strong>Invoice No:</strong> '.$invoiceNo.'<br>
                 <strong>Dated:</strong> '.$invoiceDate.'<br>
-                <strong>Reverse Charge:</strong> No<br>
-                <strong>State:</strong> Maharashtra
             </td>
         </tr>
     </table>
@@ -128,7 +131,7 @@ try {
     <table>
         <tr>
             <td class="box" width="50%">
-                <strong style="color:#0077c8">Billing Address</strong><br><br>
+                <strong style="color:#0077c8">Tenant Details</strong><br><br>
                 <strong>'.$billing['name'].'</strong><br>
                 Contact: '.$billing['contact'].'<br>
                 '.$billing['phone'].'<br>
@@ -136,7 +139,7 @@ try {
                 GSTIN: '.$billing['gst'].'
             </td>
             <td class="box" width="50%">
-                <strong style="color:#0077c8">Shipping Address</strong><br><br>
+                <strong style="color:#0077c8">Property Details</strong><br><br>
                 <strong>'.$shipping['name'].'</strong><br>
                 '.$shipping['addr'].'<br>
                 Carpet Area: '.$shipping['area'].'
@@ -160,7 +163,7 @@ try {
         <tbody>
             <tr>
                 <td>1</td>
-                <td>Rent for December 2024</td>
+                <td> Rent for '. date("F Y", strtotime($invoiceDate)) .'</td>
                 <td>997212</td>
                 <td>1</td>
                 <td class="right">'.number_format($amount).'</td>
