@@ -219,11 +219,20 @@ try {
     ]);
 
     $mpdf->WriteHTML($html);
-    $mpdf->Output("Invoice.pdf", "I"); // I = inline, D = download
+    $pdfContent = $mpdf->Output('', 'S'); // get PDF as string
+    http_response_code(200);
+    header('Content-Type: application/json');
+    echo json_encode([
+        "statusCode" => 200,
+        "message" => "Invoice generated successfully",
+        "fileName" => "Invoice.pdf",
+        "pdf" => base64_encode($pdfContent)
+    ]);
     exit;
 
 } catch (Exception $e) {
     http_response_code(500);
+    header('Content-Type: application/json');
     echo json_encode([
         "statusCode" => 500,
         "error" => ["message" => $e->getMessage()]
