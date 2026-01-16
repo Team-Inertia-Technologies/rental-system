@@ -36,7 +36,7 @@ $userid = DecodeParam($token);
 try {
 	$iInvoiceID = NextID("iInvoiceID", "invoice");
 	$now = NOW;
-	$query = "INSERT INTO iInvoiceID, dtInvoice, dInvoiceDate, vInvoiceNo, iUID, iPropertyID, iTenantID, iAgreementID, fValue, fCGST, fTotal, vPayStatus) VALUES 
+	$query = "INSERT INTO invoice (iInvoiceID, dtInvoice, dInvoiceDate, vInvoiceNo, iUID, iPropertyID, iTenantID, iAgreementID, fValue, fCGST, fTotal, vPayStatus) VALUES 
 	($iInvoiceID, '$now', '$date', '$invoiceNumber', '$userid', $propId, $tenantId, $agreementId, $rent, 0, $rent, 'DRAFT')";
 
 	sql_query($query);
