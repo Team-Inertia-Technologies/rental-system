@@ -36,6 +36,7 @@ try {
             p.vPic AS propertyImg,
             t.vParty AS tenantName,
             t.vPic AS tenantImg,
+            inv.iInvoiceID,
             CASE 
                 WHEN inv.iInvoiceID IS NULL THEN 0
                 ELSE 1
@@ -69,7 +70,8 @@ try {
             "propertyImg"   => $data['propertyImg'],
             "tenantName"    => $data['tenantName'],
             "tenantImg"     => $data['tenantImg'],
-            "invoiceStatus" => (bool)$data['invoiceStatus']
+            "invoiceStatus" => (bool)$data['invoiceStatus'],
+            "invoiceID"     => isset($data['iInvoiceID']) ? (int)$data['iInvoiceID'] : 0
         ];
     }
 
