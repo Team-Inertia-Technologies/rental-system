@@ -13,6 +13,7 @@ $request  = json_decode($postdata, true);
 $_REQUEST = array_merge($_REQUEST, $request ?? []);
 
 $token = $_REQUEST['token'] ?? '';
+$invoiceId = isset($_REQUEST['invoiceId']) ? (int)$_REQUEST['invoiceId'] : 0;
 
 if (!$token) {
     http_response_code(400);
@@ -25,29 +26,31 @@ if (!$token) {
 
 try {
 
-    /* ---------------------------
-       SAMPLE DATA (Replace with DB)
-    ---------------------------- */
-    $invoiceNo   = "INV-2024-881";
-    $invoiceDate = date("d/m/Y");
+   
+    $invoiceNo   = GetXFromYID("SELECT vInvoiceNo FROM invoice WHERE iInvoiceID=", $invoiceId);
+    $invoiceDate = GetXFromYID("SELECT dInvoiceDate FROM invoice WHERE iInvoiceID=", $invoiceId);
+    $tenantID   = GetXFromYID("SELECT iTenantID FROM invoice WHERE iInvoiceID=", $invoiceId);
+    $propertyid = GetXFromYID("SELECT iPropertyID FROM invoice WHERE iInvoiceID=", $invoiceId);
+    $fCGST    = GetXFromYID("SELECT fCGST FROM invoice WHERE iInvoiceID=", $invoiceId);
+    $fSGST    = GetXFromYID("SELECT fSGST FROM invoice WHERE iInvoiceID=", $invoiceId);
 
     $billing = [
-        "name"   => "Tech Solutions Pvt Ltd",
-        "contact"=> "Rajesh Kumar",
-        "phone"  => "+91 98765 43210",
-        "email"  => "contact@techsolutions.com",
-        "gst"    => "GST123456789"
+        "name"   => GetXFromYID("SELECT vParty FROM tenant WHERE iTenantID=", $tenantID),
+        "contact"=> GetXFromYID("SELECT vContactPerson FROM tenant WHERE iTenantID=", $tenantID),
+        "phone"  => GetXFromYID("SELECT vPartyContactNo FROM tenant WHERE iTenantID=", $tenantID),
+        "email"  => GetXFromYID("SELECT vPartyEmailID FROM tenant WHERE iTenantID=", $tenantID),
+        "gst"    => GetXFromYID("SELECT vGSTNo FROM tenant WHERE iTenantID=", $tenantID)
     ];
 
     $shipping = [
-        "name"   => "MG Road Commercial Shop",
-        "addr"   => "Mumbai, Maharashtra",
-        "area"   => "1200 sq.ft"
+        "name"   => GetXFromYID("SELECT vName FROM property WHERE iPropertyID=", $propertyid),
+        "addr"   => GetXFromYID("SELECT vAddress FROM property WHERE iPropertyID=", $propertyid),
+        "area"   => GetXFromYID("SELECT fCarpetArea FROM property WHERE iPropertyID=", $propertyid)
     ];
 
-    $amount   = 150000;
-    $cgst     = $amount * 0.09;
-    $sgst     = $amount * 0.09;
+    $amount   = GetXFromYID("SELECT fValue FROM invoice WHERE iInvoiceID=", $invoiceId);
+    $cgst     = $amount * $fCGST;
+    $sgst     = $amount * $fSGST;
     $total    = $amount + $cgst + $sgst;
 
     /* ---------------------------

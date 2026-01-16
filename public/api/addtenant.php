@@ -14,6 +14,7 @@ $token = $_REQUEST['token'] ?? '';
 $mode   = strtoupper(trim($_REQUEST['mode'] ?? ''));
 $tenantId = isset($_REQUEST['tenantId']) ? (int)$_REQUEST['tenantId'] : 0;
 $name = $_REQUEST['name'] ?? '';
+$pic = $_REQUEST['pic'] ?? '';
 $mobile = $_REQUEST['mobile'] ?? '';
 $email = $_REQUEST['email'] ?? '';
 $gstNumber = $_REQUEST['gstNumber'] ?? '';
@@ -34,7 +35,7 @@ if (!$token) {
     echo json_encode([
         "statusCode" => 400,
         "error" => [
-            "message" => "Missing token "
+            "message" => "Missing token"
         ]
     ]);
     exit;
