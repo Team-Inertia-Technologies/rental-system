@@ -31,8 +31,7 @@ try {
 		i.fTotal AS totalAmount,
 		i.vPayStatus AS status,
 		p.vName AS propertyName,
-		t.vParty AS tenantName,
-		i.tDetails AS details
+		t.vParty AS tenantName
 	FROM invoice i
 	JOIN property p ON i.iPropertyID = p.iPropertyID
 	JOIN tenant t ON i.iTenantID = t.iTenantID
@@ -48,8 +47,7 @@ try {
 			"status" => $data['status'],
 			"statusText"=> $data['status'],
 			"propertyName" => $data['propertyName'],
-			"tenantName" => $data['tenantName'],
-			"details" => $data['details'],
+			"tenantName" => $data['tenantName']
 		);
 	} else {
 		throw new Exception("Invoice not found");
