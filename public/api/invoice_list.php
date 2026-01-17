@@ -24,7 +24,7 @@ if (!$token) {
 	exit;
 }
 
-try{
+try {
 	$INVOICE_ARR = [];
 	$query = " SELECT 
 		i.iInvoiceID AS id,
@@ -42,13 +42,24 @@ try{
 	$res = sql_query($query);
 	$invoices = [];
 	while ($data = sql_fetch_assoc($res)) {
+		$statusRaw = strtoupper(trim($data['status'] ?? ''));
+
+		$statusMap = [
+			'DRAFT'   => 'D',
+			'PAID'    => 'P',
+			'SENT'    => 'S',
+			'OVERDUE' => 'O'
+		];
+
+		$status = $statusMap[$statusRaw] ?? '';
+
 		$invoices[] = array(
 			"invoiceId" => (int)$data['id'],
 			"invoiceNumber" => $data['invoiceNo'],
 			"date" => $data['invoiceDate'],
 			"total" => (float)$data['totalAmount'],
-			"status" => $data['status'],
-			"statusText"=> $data['status'],
+			"status" => $status,
+			"statusText" => $data['status'],
 			"propertyName" => $data['propertyName'],
 			"tenantName" => $data['tenantName'],
 		);
@@ -58,11 +69,11 @@ try{
 		"data" => array(
 			"invoices" => $invoices,
 			"filterOptsArr" => [
-					["val" => "A", "name" => "All"],
-					["val" => "P", "name" => "Paid"],
-					["val" => "S", "name" => "Sent"],
-					["val" => "D", "name" => "Draft"],
-					["val" => "O", "name" => "Overdue"],
+				["val" => "A", "name" => "All"],
+				["val" => "P", "name" => "Paid"],
+				["val" => "S", "name" => "Sent"],
+				["val" => "D", "name" => "Draft"],
+				["val" => "O", "name" => "Overdue"],
 			],
 		),
 		"statusCode" => 200,
@@ -70,7 +81,6 @@ try{
 	http_response_code(200);
 	echo json_encode($response);
 	exit;
-
 } catch (Exception $e) {
 	$response = array(
 		"error" => array(
