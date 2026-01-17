@@ -33,7 +33,7 @@ try {
 		i.fTotal AS totalAmount,
 		i.vPayStatus AS status,
 		p.vName AS propertyName,
-		t.vParty AS tenantName
+		t.vParty AS tenantName,
 		t.vPartyContactNo,
 		t.vPartyEmailID
 		t.vGSTNo

@@ -14,7 +14,7 @@ $token = $_REQUEST['token'] ?? '';
 
 if (!$token) {
     http_response_code(400);
-	header('Content-Type: application/json');
+    header('Content-Type: application/json');
     echo json_encode([
         "statusCode" => 400,
         "error" => [
@@ -24,8 +24,8 @@ if (!$token) {
     exit;
 }
 
-try{
-	$query = "
+try {
+    $query = "
         SELECT 
             p.iPropertyID AS id,
             p.vName AS propertyName,
@@ -36,6 +36,7 @@ try{
             p.vPic AS propertyImg,
             t.vParty AS tenantName,
             t.vPic AS tenantImg,
+            inv.iInvoiceID,
             CASE 
                 WHEN inv.iInvoiceID IS NULL THEN 0
                 ELSE 1
@@ -69,11 +70,12 @@ try{
             "propertyImg"   => $data['propertyImg'],
             "tenantName"    => $data['tenantName'],
             "tenantImg"     => $data['tenantImg'],
-            "invoiceStatus" => (bool)$data['invoiceStatus']
+            "invoiceStatus" => (bool)$data['invoiceStatus'],
+            "invoiceID"     => isset($data['iInvoiceID']) ? (int)$data['iInvoiceID'] : 0
         ];
     }
-	/* ---------------- OUTSTANDING AGING ANALYSIS ---------------- */
-	$agingQuery = "
+    /* ---------------- OUTSTANDING AGING ANALYSIS ---------------- */
+    $agingQuery = "
 	SELECT
 		SUM(CASE WHEN DATEDIFF(CURDATE(), dInvoiceDate) <= 30 
 				THEN fOutstanding ELSE 0 END) AS lt_30,
@@ -88,32 +90,31 @@ try{
 	AND fOutstanding > 0
 	";
 
-	$agingRes = sql_query($agingQuery);
-	$agingRow = sql_fetch_assoc($agingRes);
+    $agingRes = sql_query($agingQuery);
+    $agingRow = sql_fetch_assoc($agingRes);
 
-	$outstandingAnalysis = [
-	"lt30Days"  => (float)$agingRow['lt_30'],
-	"bt30_60"   => (float)$agingRow['bt_30_60'],
-	"gt60Days"  => (float)$agingRow['gt_60']
-	];
+    $outstandingAnalysis = [
+        "lt30Days"  => (float)$agingRow['lt_30'],
+        "bt30_60"   => (float)$agingRow['bt_30_60'],
+        "gt60Days"  => (float)$agingRow['gt_60']
+    ];
 
-	http_response_code(200);
-	header('Content-Type: application/json');
-	echo json_encode([
-	"statusCode" => 200,
-	"data" => [
-		"propertyList" => $properties,
-		"outstandingAnalysis" => $outstandingAnalysis
-	]
-	]);
-	exit;
-
-} 	catch (Exception $e) {
-	http_response_code(500);
-	header('Content-Type: application/json');
-	echo json_encode([
-	"statusCode" => 500,
-	"error" => ["message" => $e->getMessage()]
-	]);
-	exit;
+    http_response_code(200);
+    header('Content-Type: application/json');
+    echo json_encode([
+        "statusCode" => 200,
+        "data" => [
+            "propertyList" => $properties,
+            "outstandingAnalysis" => $outstandingAnalysis
+        ]
+    ]);
+    exit;
+} catch (Exception $e) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        "statusCode" => 500,
+        "error" => ["message" => $e->getMessage()]
+    ]);
+    exit;
 }
