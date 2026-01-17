@@ -35,7 +35,7 @@ try {
 		p.vName AS propertyName,
 		t.vParty AS tenantName,
 		t.vPartyContactNo,
-		t.vPartyEmailID
+		t.vPartyEmailID,
 		t.vGSTNo
 	FROM invoice i
 	JOIN property p ON i.iPropertyID = p.iPropertyID
