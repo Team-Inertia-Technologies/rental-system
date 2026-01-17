@@ -92,7 +92,7 @@ if (!empty($_FILES['pic']) && $_FILES['pic']['error'] === UPLOAD_ERR_OK) {
     $objectKey = "tenant/" . $fileName;
 
     $result = $s3->putObject([
-        'Bucket'      => 'rental',
+        'Bucket'      => 'firstbucket',
         'Key'         => $objectKey,
         'SourceFile'  => $tmpPath,
         'ACL'         => 'public-read',
@@ -119,14 +119,14 @@ try {
             ) VALUES (
                 $Id,
                 $userid,
-                '".db_input($name)."',
-                '".db_input($mobile)."',
-                '".db_input($email)."',
-                '".db_input($gstNumber)."',
-                '".db_input($panNumber)."',
-                '".db_input($contactPerson)."',
+                '" . db_input($name) . "',
+                '" . db_input($mobile) . "',
+                '" . db_input($email) . "',
+                '" . db_input($gstNumber) . "',
+                '" . db_input($panNumber) . "',
+                '" . db_input($contactPerson) . "',
                 $type,
-                '".db_input($picUrl)."',
+                '" . db_input($picUrl) . "',
                 'A'
             )
         ";
@@ -155,16 +155,16 @@ try {
             exit;
         }
 
-        $picSql = $picUrl ? ", vPic = '".db_input($picUrl)."'" : '';
+        $picSql = $picUrl ? ", vPic = '" . db_input($picUrl) . "'" : '';
 
         $updateQuery = "
             UPDATE tenant SET
-                vParty = '".db_input($name)."',
-                vPartyContactNo = '".db_input($mobile)."',
-                vPartyEmailID = '".db_input($email)."',
-                vGSTNo = '".db_input($gstNumber)."',
-                vPanNo = '".db_input($panNumber)."',
-                vContactPerson = '".db_input($contactPerson)."'
+                vParty = '" . db_input($name) . "',
+                vPartyContactNo = '" . db_input($mobile) . "',
+                vPartyEmailID = '" . db_input($email) . "',
+                vGSTNo = '" . db_input($gstNumber) . "',
+                vPanNo = '" . db_input($panNumber) . "',
+                vContactPerson = '" . db_input($contactPerson) . "'
                 $picSql
             WHERE iTenantID = $tenantId
             AND cStatus = 'A'
@@ -181,7 +181,6 @@ try {
         ]);
         exit;
     }
-
 } catch (Exception $e) {
 
     http_response_code(500);
