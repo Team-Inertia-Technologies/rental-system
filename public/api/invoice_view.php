@@ -28,10 +28,15 @@ try {
 		i.iInvoiceID AS id,
 		i.vInvoiceNo AS invoiceNo,
 		i.dInvoiceDate AS invoiceDate,
+		i.fValue,
+		i.fCGST,
 		i.fTotal AS totalAmount,
 		i.vPayStatus AS status,
 		p.vName AS propertyName,
 		t.vParty AS tenantName
+		t.vPartyContactNo,
+		t.vPartyEmailID
+		t.vGSTNo
 	FROM invoice i
 	JOIN property p ON i.iPropertyID = p.iPropertyID
 	JOIN tenant t ON i.iTenantID = t.iTenantID
@@ -42,12 +47,17 @@ try {
 		$invoice = array(
 			"invoiceId" => (int)$data['id'],
 			"invoiceNumber" => $data['invoiceNo'],
-			"date" => $data['invoiceDate'],
+			"date" => date('M Y', strtotime($data['invoiceDate'])),
+			"amount" => (float)$data['fValue'],
+			"cgst" => (float)$data['fCGST'],
 			"total" => (float)$data['totalAmount'],
 			"status" => $data['status'],
-			"statusText"=> $data['status'],
+			"statusText" => $data['status'],
 			"propertyName" => $data['propertyName'],
-			"tenantName" => $data['tenantName']
+			"tenantName" => $data['tenantName'],
+			"tenantContactNo" => $data['vPartyContactNo'],
+			"tenantEmail" => $data['vPartyEmailID'],
+			"tenantGSTNo" => $data['vGSTNo'],
 		);
 	} else {
 		throw new Exception("Invoice not found");
@@ -62,7 +72,6 @@ try {
 	http_response_code(200);
 	echo json_encode($response);
 	exit;
-
 } catch (Exception $e) {
 	$response = array(
 		"error" => array(
@@ -74,4 +83,3 @@ try {
 	echo json_encode($response);
 	exit;
 }
-?>
