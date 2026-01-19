@@ -5029,7 +5029,7 @@ function ObjectStorage()
     $client = new Aws\S3\S3Client([
         "region"  => "us-east-1",
         "version" => "latest",
-        "endpoint" => "https://console-ti-stage-projects-minio.krjqe5.easypanel.host",
+        "endpoint" => "https://ti-stage-projects-minio.krjqe5.easypanel.host/",
 
         "credentials" => [
             "key"    => "2S34dCIyBH7Xndiu073H",
