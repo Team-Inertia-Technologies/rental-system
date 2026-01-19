@@ -4,9 +4,7 @@ ini_set('display_errors', 0);
 
 $NO_REDIRECT = $NO_PRELOAD = 1;
 include "../includes/common_api.php";
-
-header('Content-Type: application/json');
-
+$S3OBJ = ObjectStorage();
 /* ===========================
    Enforce multipart/form-data
 =========================== */
@@ -19,24 +17,6 @@ if (stripos($contentType, 'multipart/form-data') === false) {
     ]);
     exit;
 }
-
-/* ===========================
-   MinIO Configuration
-=========================== */
-require '../includes/vendor/autoload.php';
-
-use Aws\S3\S3Client;
-
-$s3 = new S3Client([
-    'version' => 'latest',
-    'region'  => 'us-east-1',
-    'endpoint' => 'https://console-ti-stage-projects-minio.krjqe5.easypanel.host',
-    'use_path_style_endpoint' => true,
-    'credentials' => [
-        'key'    => '2S34dCIyBH7Xndiu073H',
-        'secret' => 'NIi1U3gBJ7D0DbSxTppOg1B5iDSwpCcEevw9dSbl',
-    ],
-]);
 
 /* ===========================
    Inputs (FORM DATA)
@@ -82,21 +62,29 @@ if (!empty($_FILES['propertyPic']) && $_FILES['propertyPic']['error'] === UPLOAD
 
     $allowedImg = ['image/png','image/jpeg','image/webp'];
     if (!in_array($_FILES['propertyPic']['type'], $allowedImg)) {
-        throw new Exception("Invalid property image type");
+        http_response_code(400);
+        echo json_encode([
+            "statusCode" => 400,
+            "message" => "Invalid image type"
+        ]);
     }
 
     $imgName = time().'_'.preg_replace('/[^a-zA-Z0-9._-]/','',$_FILES['propertyPic']['name']);
-    $imgKey  = "property/".$imgName;
+    $imgKey  = time()."_".$imgName;
 
-    $result = $s3->putObject([
-        'Bucket'      => 'firstbucket',
-        'Key'         => $imgKey,
-        'SourceFile'  => $_FILES['propertyPic']['tmp_name'],
-        'ACL'         => 'public-read',
-        'ContentType' => $_FILES['propertyPic']['type']
-    ]);
+    $uploadPath = "property/";
 
-    $propertyPic = $result['ObjectURL'];
+    $result = ObjectStorageUpload($uploadPath, $imgKey, $_FILES['propertyPic']['tmp_name']);
+
+    if (!$result) {
+        http_response_code(500);
+        echo json_encode([
+            "statusCode" => 500,
+            "message" => "Image upload failed"
+        ]);
+        exit;
+    } 
+    $propertyPic = $uploadPath . $imgKey;
 }
 
 /* ===========================
@@ -107,21 +95,32 @@ $agreementDoc = '';
 if (!empty($_FILES['agreementDoc']) && $_FILES['agreementDoc']['error'] === UPLOAD_ERR_OK) {
 
     if ($_FILES['agreementDoc']['type'] !== 'application/pdf') {
-        throw new Exception("Agreement must be PDF");
+        http_response_code(400);
+        echo json_encode([
+            "statusCode" => 400,
+            "message" => "Invalid document type"
+        ]);
+        exit;
     }
 
     $pdfName = time().'_'.preg_replace('/[^a-zA-Z0-9._-]/','',$_FILES['agreementDoc']['name']);
-    $pdfKey  = "agreement/".$pdfName;
+    $pdfKey  = time()."_".$pdfName;
 
-    $result = $s3->putObject([
-        'Bucket'      => 'firstbucket',
-        'Key'         => $pdfKey,
-        'SourceFile'  => $_FILES['agreementDoc']['tmp_name'],
-        'ACL'         => 'public-read',
-        'ContentType' => 'application/pdf'
-    ]);
+    $path = "agreement/";
 
-    $agreementDoc = $result['ObjectURL'];
+    $result = ObjectStorageUpload($path, $pdfKey, $_FILES['agreementDoc']['tmp_name']);
+
+    if (!$result) {
+        http_response_code(500);
+        echo json_encode([
+            "statusCode" => 500,
+            "message" => "Image upload failed"
+        ]);
+        exit;
+    }
+
+
+    $agreementDoc = $path . $pdfKey;
 }
 
 try {
