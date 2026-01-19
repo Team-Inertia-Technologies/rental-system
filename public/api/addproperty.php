@@ -189,9 +189,10 @@ try {
         if ($propId <= 0) {
             throw new Exception("Invalid Property ID");
         }
-
+    
+        /* ---------- PROPERTY UPDATE ---------- */
         $picSql = $propertyPic ? ", vPic='".db_input($propertyPic)."'" : '';
-
+    
         sql_query("
             UPDATE property SET
                 vName='".db_input($name)."',
@@ -203,26 +204,61 @@ try {
                 $picSql
             WHERE iPropertyID=$propId
         ");
-
+    
+        /* ---------- AGREEMENT UPSERT ---------- */
         if ($tenantId > 0) {
-
+    
             $from = $leaseStart ? "'".db_input($leaseStart)."'" : "NULL";
             $to   = $leaseEnd   ? "'".db_input($leaseEnd)."'"   : "NULL";
-
-            sql_query("
-                UPDATE agreement SET
-                    iTenantID=$tenantId,
-                    iPropertyTypeID=$type,
-                    fAmount=$monthlyRent,
-                    dFrom=$from,
-                    dTo=$to,
-                    vAgreementDoc='".db_input($agreementDoc)."'
-                WHERE iPropertyID=$propId
+            $agreementExists = GetXFromYID("
+                SELECT COUNT(*) 
+                FROM agreement 
+                WHERE iPropertyID = $propId
             ");
+    
+            if ($agreementExists > 0) {
+                sql_query("
+                    UPDATE agreement SET
+                        iTenantID=$tenantId,
+                        iPropertyTypeID=$type,
+                        fAmount=$monthlyRent,
+                        dFrom=$from,
+                        dTo=$to,
+                        vAgreementDoc='".db_input($agreementDoc)."'
+                    WHERE iPropertyID=$propId
+                ");
+    
+            } else {
+                $agreementId = NextID('iAgreementID', 'agreement');
+    
+                sql_query("
+                    INSERT INTO agreement (
+                        iAgreementID,
+                        iPropertyID,
+                        iTenantID,
+                        iPropertyTypeID,
+                        fAmount,
+                        dFrom,
+                        dTo,
+                        vAgreementDoc,
+                        cStatus
+                    ) VALUES (
+                        $agreementId,
+                        $propId,
+                        $tenantId,
+                        $type,
+                        $monthlyRent,
+                        $from,
+                        $to,
+                        '".db_input($agreementDoc)."',
+                        'A'
+                    )
+                ");
+            }
         }
-
+    
         $message = "Property updated successfully";
-    }
+    }    
 
     echo json_encode([
         "statusCode" => 200,
