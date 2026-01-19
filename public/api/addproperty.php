@@ -1,29 +1,60 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
+
 $NO_REDIRECT = $NO_PRELOAD = 1;
 include "../includes/common_api.php";
 
 header('Content-Type: application/json');
 
-$request = json_decode(file_get_contents("php://input"), true);
-$_REQUEST = array_merge($_REQUEST, $request ?? []);
+/* ===========================
+   Enforce multipart/form-data
+=========================== */
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+if (stripos($contentType, 'multipart/form-data') === false) {
+    http_response_code(415);
+    echo json_encode([
+        "statusCode" => 415,
+        "message" => "Content-Type must be multipart/form-data"
+    ]);
+    exit;
+}
 
-$token  = $_REQUEST['token'] ?? '';
-$mode   = strtoupper(trim($_REQUEST['mode'] ?? ''));
+/* ===========================
+   MinIO Configuration
+=========================== */
+require '../includes/vendor/autoload.php';
 
-$propId        = (int)($_REQUEST['propId'] ?? 0);
-$name          = $_REQUEST['name'] ?? '';
-$address       = $_REQUEST['address'] ?? '';
-$category      = (int)($_REQUEST['category'] ?? 0);
-$type          = (int)($_REQUEST['type'] ?? 0);
-$carpetArea    = (float)($_REQUEST['carpetArea'] ?? 0);
-$builtUpArea   = (float)($_REQUEST['builtUpArea'] ?? 0);
-$tenantId      = (int)($_REQUEST['tenantId'] ?? 0);
-$monthlyRent   = (float)($_REQUEST['monthlyRent'] ?? 0);
-$leaseStart    = $_REQUEST['leaseStart'] ?? '';
-$leaseEnd      = $_REQUEST['leaseEnd'] ?? '';
-$agreementdoc  = $_REQUEST['agreementdoc'] ?? '';
+use Aws\S3\S3Client;
+
+$s3 = new S3Client([
+    'version' => 'latest',
+    'region'  => 'us-east-1',
+    'endpoint' => 'https://console-ti-stage-projects-minio.krjqe5.easypanel.host',
+    'use_path_style_endpoint' => true,
+    'credentials' => [
+        'key'    => '2S34dCIyBH7Xndiu073H',
+        'secret' => 'NIi1U3gBJ7D0DbSxTppOg1B5iDSwpCcEevw9dSbl',
+    ],
+]);
+
+/* ===========================
+   Inputs (FORM DATA)
+=========================== */
+$token  = $_POST['token'] ?? '';
+$mode   = strtoupper(trim($_POST['mode'] ?? ''));
+
+$propId        = (int)($_POST['propId'] ?? 0);
+$name          = $_POST['name'] ?? '';
+$address       = $_POST['address'] ?? '';
+$category      = (int)($_POST['category'] ?? 0);
+$type          = (int)($_POST['type'] ?? 0);
+$carpetArea    = (float)($_POST['carpetArea'] ?? 0);
+$builtUpArea   = (float)($_POST['builtUpArea'] ?? 0);
+$tenantId      = (int)($_POST['tenantId'] ?? 0);
+$monthlyRent   = (float)($_POST['monthlyRent'] ?? 0);
+$leaseStart    = $_POST['leaseStart'] ?? '';
+$leaseEnd      = $_POST['leaseEnd'] ?? '';
 
 if (!in_array($mode, ['INSERT', 'UPDATE'])) {
     http_response_code(400);
@@ -33,30 +64,79 @@ if (!in_array($mode, ['INSERT', 'UPDATE'])) {
 
 if (!$token) {
     http_response_code(400);
-    header('Content-Type: application/json');
     echo json_encode([
         "statusCode" => 400,
-        "error" => [
-            "message" => "Missing token "
-        ]
+        "message" => "Missing token"
     ]);
     exit;
 }
 
-$userid = DecodeParam($token); 
+$userid = DecodeParam($token);
+
+/* ===========================
+   Upload Property Image
+=========================== */
+$propertyPic = '';
+
+if (!empty($_FILES['propertyPic']) && $_FILES['propertyPic']['error'] === UPLOAD_ERR_OK) {
+
+    $allowedImg = ['image/png','image/jpeg','image/webp'];
+    if (!in_array($_FILES['propertyPic']['type'], $allowedImg)) {
+        throw new Exception("Invalid property image type");
+    }
+
+    $imgName = time().'_'.preg_replace('/[^a-zA-Z0-9._-]/','',$_FILES['propertyPic']['name']);
+    $imgKey  = "property/".$imgName;
+
+    $result = $s3->putObject([
+        'Bucket'      => 'firstbucket',
+        'Key'         => $imgKey,
+        'SourceFile'  => $_FILES['propertyPic']['tmp_name'],
+        'ACL'         => 'public-read',
+        'ContentType' => $_FILES['propertyPic']['type']
+    ]);
+
+    $propertyPic = $result['ObjectURL'];
+}
+
+/* ===========================
+   Upload Agreement PDF
+=========================== */
+$agreementDoc = '';
+
+if (!empty($_FILES['agreementDoc']) && $_FILES['agreementDoc']['error'] === UPLOAD_ERR_OK) {
+
+    if ($_FILES['agreementDoc']['type'] !== 'application/pdf') {
+        throw new Exception("Agreement must be PDF");
+    }
+
+    $pdfName = time().'_'.preg_replace('/[^a-zA-Z0-9._-]/','',$_FILES['agreementDoc']['name']);
+    $pdfKey  = "agreement/".$pdfName;
+
+    $result = $s3->putObject([
+        'Bucket'      => 'firstbucket',
+        'Key'         => $pdfKey,
+        'SourceFile'  => $_FILES['agreementDoc']['tmp_name'],
+        'ACL'         => 'public-read',
+        'ContentType' => 'application/pdf'
+    ]);
+
+    $agreementDoc = $result['ObjectURL'];
+}
 
 try {
 
-    /* ===============================
-       INSERT MODE
-    =============================== */
+    /* ===========================
+       INSERT
+    ============================ */
     if ($mode === 'INSERT') {
 
         $propId = NextID("iPropertyID", "property");
 
-        $insertProperty = "
+        sql_query("
             INSERT INTO property
-            (iPropertyID, iUID, vName, vAddress, iCategoryID, iPropertyTypeID, fCarpetArea, fBuiltArea)
+            (iPropertyID, iUID, vName, vAddress, iCategoryID, iPropertyTypeID,
+             fCarpetArea, fBuiltArea, vPic)
             VALUES (
                 $propId,
                 $userid,
@@ -65,22 +145,24 @@ try {
                 $category,
                 $type,
                 $carpetArea,
-                $builtUpArea
+                $builtUpArea,
+                '".db_input($propertyPic)."'
             )
-        ";
-        sql_query($insertProperty);
+        ");
 
         if ($tenantId > 0) {
+
             $agreementId = NextID("iAgreementID", "agreement");
             $now = NOW;
 
-            $leaseStartDate = $leaseStart ? "'".db_input($leaseStart)."'" : "NULL";
-            $leaseEndDate   = $leaseEnd ? "'".db_input($leaseEnd)."'" : "NULL";
+            $from = $leaseStart ? "'".db_input($leaseStart)."'" : "NULL";
+            $to   = $leaseEnd   ? "'".db_input($leaseEnd)."'"   : "NULL";
 
-            $insertAgreement = "
+            sql_query("
                 INSERT INTO agreement
-                (iAgreementID, dtAgreement, dAgreementDate, iPropertyID, iUID, iTenantID,
-                 iPropertyTypeID, fAmount, dFrom, dTo, vAgreementDoc)
+                (iAgreementID, dtAgreement, dAgreementDate, iPropertyID,
+                 iUID, iTenantID, iPropertyTypeID, fAmount,
+                 dFrom, dTo, vAgreementDoc)
                 VALUES (
                     $agreementId,
                     '$now',
@@ -90,27 +172,28 @@ try {
                     $tenantId,
                     $type,
                     $monthlyRent,
-                    $leaseStartDate,
-                    $leaseEndDate,
-                    '".db_input($agreementdoc)."'
+                    $from,
+                    $to,
+                    '".db_input($agreementDoc)."'
                 )
-            ";
-            sql_query($insertAgreement);
+            ");
         }
 
         $message = "Property added successfully";
     }
 
-    /* ===============================
-       UPDATE MODE
-    =============================== */
+    /* ===========================
+       UPDATE
+    ============================ */
     if ($mode === 'UPDATE') {
 
         if ($propId <= 0) {
             throw new Exception("Invalid Property ID");
         }
 
-        $updateProperty = "
+        $picSql = $propertyPic ? ", vPic='".db_input($propertyPic)."'" : '';
+
+        sql_query("
             UPDATE property SET
                 vName='".db_input($name)."',
                 vAddress='".db_input($address)."',
@@ -118,31 +201,25 @@ try {
                 iPropertyTypeID=$type,
                 fCarpetArea=$carpetArea,
                 fBuiltArea=$builtUpArea
+                $picSql
             WHERE iPropertyID=$propId
-        ";
-        sql_query($updateProperty);
+        ");
 
         if ($tenantId > 0) {
-            $leaseStartDate = $leaseStart ? "'".db_input($leaseStart)."'" : "NULL";
-            $leaseEndDate   = $leaseEnd ? "'".db_input($leaseEnd)."'" : "NULL";
 
-            $agreementExists = sql_num_rows(
-                sql_query("SELECT iAgreementID FROM agreement WHERE iPropertyID=$propId")
-            );
+            $from = $leaseStart ? "'".db_input($leaseStart)."'" : "NULL";
+            $to   = $leaseEnd   ? "'".db_input($leaseEnd)."'"   : "NULL";
 
-            if ($agreementExists) {
-                $updateAgreement = "
-                    UPDATE agreement SET
-                        iTenantID=$tenantId,
-                        iPropertyTypeID=$type,
-                        fAmount=$monthlyRent,
-                        dFrom=$leaseStartDate,
-                        dTo=$leaseEndDate,
-                        vAgreementDoc='".db_input($agreementdoc)."'
-                    WHERE iPropertyID=$propId
-                ";
-                sql_query($updateAgreement);
-            }
+            sql_query("
+                UPDATE agreement SET
+                    iTenantID=$tenantId,
+                    iPropertyTypeID=$type,
+                    fAmount=$monthlyRent,
+                    dFrom=$from,
+                    dTo=$to,
+                    vAgreementDoc='".db_input($agreementDoc)."'
+                WHERE iPropertyID=$propId
+            ");
         }
 
         $message = "Property updated successfully";

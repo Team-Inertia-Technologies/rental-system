@@ -6,6 +6,19 @@ $NO_REDIRECT = $NO_PRELOAD = 1;
 include "../includes/common_api.php";
 
 /* ===========================
+   Enforce multipart/form-data
+=========================== */
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+if (stripos($contentType, 'multipart/form-data') === false) {
+    http_response_code(415);
+    echo json_encode([
+        "statusCode" => 415,
+        "message" => "Content-Type must be multipart/form-data"
+    ]);
+    exit;
+}
+
+/* ===========================
    MinIO (S3) Configuration
 =========================== */
 require '../includes/vendor/autoload.php';
@@ -24,36 +37,28 @@ $s3 = new S3Client([
 ]);
 
 /* ===========================
-   Support JSON OR multipart
+   Inputs (FORM-DATA ONLY)
 =========================== */
-if (empty($_FILES)) {
-    $postdata = file_get_contents("php://input");
-    $request = json_decode($postdata, true);
-    if (is_array($request)) {
-        $_REQUEST = array_merge($_REQUEST, $request);
-    }
-}
-
-/* ===========================
-   Inputs
-=========================== */
-$token         = $_REQUEST['token'] ?? '';
-$mode          = strtoupper(trim($_REQUEST['mode'] ?? ''));
-$tenantId      = isset($_REQUEST['tenantId']) ? (int)$_REQUEST['tenantId'] : 0;
-$name          = $_REQUEST['name'] ?? '';
-$mobile        = $_REQUEST['mobile'] ?? '';
-$email         = $_REQUEST['email'] ?? '';
-$gstNumber     = $_REQUEST['gstNumber'] ?? '';
-$panNumber     = $_REQUEST['panNumber'] ?? '';
-$contactPerson = $_REQUEST['contactPerson'] ?? '';
-$type          = isset($_REQUEST['type']) ? (int)$_REQUEST['type'] : 0;
+$token         = $_POST['token'] ?? '';
+$mode          = strtoupper(trim($_POST['mode'] ?? ''));
+$tenantId      = isset($_POST['tenantId']) ? (int)$_POST['tenantId'] : 0;
+$name          = $_POST['name'] ?? '';
+$mobile        = $_POST['mobile'] ?? '';
+$email         = $_POST['email'] ?? '';
+$gstNumber     = $_POST['gstNumber'] ?? '';
+$panNumber     = $_POST['panNumber'] ?? '';
+$contactPerson = $_POST['contactPerson'] ?? '';
+$type          = isset($_POST['type']) ? (int)$_POST['type'] : 0;
 
 /* ===========================
    Validation
 =========================== */
 if (!in_array($mode, ['INSERT', 'UPDATE'])) {
     http_response_code(400);
-    echo json_encode(["statusCode" => 400, "message" => "Invalid mode"]);
+    echo json_encode([
+        "statusCode" => 400,
+        "message" => "Invalid mode"
+    ]);
     exit;
 }
 
@@ -61,7 +66,7 @@ if (!$token) {
     http_response_code(400);
     echo json_encode([
         "statusCode" => 400,
-        "error" => ["message" => "Missing token"]
+        "message" => "Missing token"
     ]);
     exit;
 }
@@ -76,25 +81,33 @@ $picUrl = '';
 if (!empty($_FILES['pic']) && $_FILES['pic']['error'] === UPLOAD_ERR_OK) {
 
     $allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+
     if (!in_array($_FILES['pic']['type'], $allowedTypes)) {
-        throw new Exception("Invalid image type");
+        http_response_code(400);
+        echo json_encode([
+            "statusCode" => 400,
+            "message" => "Invalid image type"
+        ]);
+        exit;
     }
 
     if ($_FILES['pic']['size'] > 2 * 1024 * 1024) {
-        throw new Exception("Image size exceeds 2MB");
+        http_response_code(400);
+        echo json_encode([
+            "statusCode" => 400,
+            "message" => "Image size exceeds 2MB"
+        ]);
+        exit;
     }
-
-    $tmpPath = $_FILES['pic']['tmp_name'];
 
     $safeName = preg_replace('/[^a-zA-Z0-9._-]/', '', $_FILES['pic']['name']);
     $fileName = time() . '_' . $safeName;
-
     $objectKey = "tenant/" . $fileName;
 
     $result = $s3->putObject([
         'Bucket'      => 'firstbucket',
         'Key'         => $objectKey,
-        'SourceFile'  => $tmpPath,
+        'SourceFile'  => $_FILES['pic']['tmp_name'],
         'ACL'         => 'public-read',
         'ContentType' => $_FILES['pic']['type']
     ]);
@@ -135,10 +148,8 @@ try {
 
         echo json_encode([
             "statusCode" => 200,
-            "data" => [
-                "tenantId" => $Id,
-                "message" => "Tenant added successfully"
-            ]
+            "message" => "Tenant added successfully",
+            "tenantId" => $Id
         ]);
         exit;
     }
@@ -150,7 +161,7 @@ try {
             http_response_code(400);
             echo json_encode([
                 "statusCode" => 400,
-                "message" => "Invalid tenantId for update"
+                "message" => "Invalid tenantId"
             ]);
             exit;
         }
@@ -174,21 +185,17 @@ try {
 
         echo json_encode([
             "statusCode" => 200,
-            "data" => [
-                "tenantId" => $tenantId,
-                "message" => "Tenant details updated successfully"
-            ]
+            "message" => "Tenant updated successfully",
+            "tenantId" => $tenantId
         ]);
         exit;
     }
-} catch (Exception $e) {
 
+} catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         "statusCode" => 500,
-        "error" => [
-            "message" => $e->getMessage()
-        ]
+        "message" => $e->getMessage()
     ]);
     exit;
 }
