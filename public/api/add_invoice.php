@@ -15,6 +15,8 @@ $invoiceNumber = $_REQUEST['invoiceNumber'] ?? '';
 $agreementId = isset($_REQUEST['agreementId']) ? (int)$_REQUEST['agreementId'] : 0;
 $date = $_REQUEST['date'] ?? '';
 $rent = isset($_REQUEST['rent']) ? (float)$_REQUEST['rent'] : 0;
+$gst = isset($_REQUEST['gst']) ? (float)$_REQUEST['gst'] : 0;
+$totalAmount = isset($_REQUEST['totalAmount']) ? (float)$_REQUEST['totalAmount'] : 0;
 $propId = isset($_REQUEST['propId']) ? (int)$_REQUEST['propId'] : 0;
 $propertyName = $_REQUEST['propertyName'] ?? '';
 $tenantId = isset($_REQUEST['tenantId']) ? (int)$_REQUEST['tenantId'] : 0;
@@ -37,7 +39,7 @@ try {
 	$iInvoiceID = NextID("iInvoiceID", "invoice");
 	$now = NOW;
 	$query = "INSERT INTO invoice (iInvoiceID, dtInvoice, dInvoiceDate, vInvoiceNo, iUID, iPropertyID, iTenantID, iAgreementID, fValue, fCGST, fTotal, vPayStatus) VALUES 
-	($iInvoiceID, '$now', '$date', '$invoiceNumber', '$userid', $propId, $tenantId, $agreementId, $rent, 0, $rent, 'DRAFT')";
+	($iInvoiceID, '$now', '$date', '$invoiceNumber', '$userid', $propId, $tenantId, $agreementId, $rent, $gst, $totalAmount, 'DRAFT')";
 
 	sql_query($query);
 

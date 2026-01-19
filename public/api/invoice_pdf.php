@@ -33,6 +33,7 @@ try {
             i.fValue,
             i.fCGST,
             i.fSGST,
+            i.fTotal,
 
             t.vParty,
             t.vContactPerson,
@@ -87,9 +88,8 @@ try {
     ];
 
     $amount   = (float)$row->fValue;
-    $cgst     = $amount * $row->fCGST;
-    $sgst     = $amount * $row->fSGST;
-    $total    = $amount + $cgst + $sgst;
+    $cgst     = $row->fCGST;
+    $total    = $row->fTotal;
 
     /* ---------------------------
        HTML INVOICE
