@@ -5013,44 +5013,61 @@ function get_mime_content_type($source)
 
 // 	return $S3OBJ;
 // }
-// function ObjectStorage()
-// {
-//     require_once realpath(dirname(__FILE__) . "/libs/aws/aws-autoloader.php");
+function ObjectStorage()
+{
+    static $client = null;
 
-//     $S3OBJ = new Aws\S3\S3Client([
-//         "region" => AWS_S3_REGION, // usually "blr1"
-//         "version" => "latest",
-//         "endpoint" => "https://blr1.digitaloceanspaces.com", // ✅ REMOVE BUCKET from endpoint
-//         "credentials" => [
-//             "key"    => AWS_S3_KEY,
-//             "secret" => AWS_S3_SECRET,
-//         ],
-//         "bucket_endpoint" => false,              // ✅ Must be false
-//         "use_path_style_endpoint" => false,      // ✅ Must be false
-//     ]);
+    if ($client !== null) {
+        return $client;
+    }
 
-//     return $S3OBJ;
-// }
+    // ⚠️ Load Composer ONLY ONCE
+    if (!class_exists(\Aws\S3\S3Client::class)) {
+        require_once realpath(dirname(__FILE__) . "/vendor/autoload.php");
+    }
+
+    $client = new Aws\S3\S3Client([
+        "region"  => "us-east-1",
+        "version" => "latest",
+        "endpoint" => "https://console-ti-stage-projects-minio.krjqe5.easypanel.host",
+
+        "credentials" => [
+            "key"    => "2S34dCIyBH7Xndiu073H",
+            "secret" => "NIi1U3gBJ7D0DbSxTppOg1B5iDSwpCcEevw9dSbl",
+        ],
+
+        // ✅ REQUIRED FOR MINIO
+        "use_path_style_endpoint" => true,
+        "bucket_endpoint"         => false,
+    ]);
+
+    return $client;
+}
+
 
 function ObjectStorageUpload($upload_path, $fileName, $sourceFile)
 {
-	global $S3OBJ;
-	$fileName = $upload_path . (!empty($fileName) ? $fileName : time());
+    $s3 = ObjectStorage();
 
-	$result = $S3OBJ->putObject(array(
-		'Bucket'		=>	AWS_S3_BUCKET,
-		'ACL'			=>	AWS_S3_BUCKET_PUT,
-		'Key'			=>	$fileName,
-		'SourceFile'	=>	$sourceFile,
-		'ContentType'	=>	get_mime_content_type($sourceFile),
-		//'ContentDisposition' => 'inline; filename=filename.jpg',
-	));
+    $key = rtrim($upload_path, '/') . '/' . $fileName;
 
-	$response = $S3OBJ->doesObjectExist(AWS_S3_BUCKET, $fileName);
+    try {
+        $s3->putObject([
+            'Bucket'      => 'firstbucket',
+            'Key'         => $key,
+            'SourceFile'  => $sourceFile,
+            'ACL'         => 'public-read',
+            'ContentType' => mime_content_type($sourceFile),
+        ]);
 
-	if (!empty($response) && $response == '1') return 1;
-	else return 0;
+        return $s3->doesObjectExist('firstbucket', $key);
+
+    } catch (Exception $e) {
+        error_log("MinIO Upload Error: " . $e->getMessage());
+        return false;
+    }
 }
+
 
 function ObjectStorageDelete($upload_path, $fileName)
 {

@@ -4,6 +4,7 @@ ini_set('display_errors', 0);
 
 $NO_REDIRECT = $NO_PRELOAD = 1;
 include "../includes/common_api.php";
+$S3OBJ = ObjectStorage();
 
 /* ===========================
    Enforce multipart/form-data
@@ -17,24 +18,6 @@ if (stripos($contentType, 'multipart/form-data') === false) {
     ]);
     exit;
 }
-
-/* ===========================
-   MinIO (S3) Configuration
-=========================== */
-require '../includes/vendor/autoload.php';
-
-use Aws\S3\S3Client;
-
-$s3 = new S3Client([
-    'version' => 'latest',
-    'region'  => 'us-east-1',
-    'endpoint' => 'https://console-ti-stage-projects-minio.krjqe5.easypanel.host',
-    'use_path_style_endpoint' => true,
-    'credentials' => [
-        'key'    => '2S34dCIyBH7Xndiu073H',
-        'secret' => 'NIi1U3gBJ7D0DbSxTppOg1B5iDSwpCcEevw9dSbl',
-    ],
-]);
 
 /* ===========================
    Inputs (FORM-DATA ONLY)
@@ -102,18 +85,29 @@ if (!empty($_FILES['pic']) && $_FILES['pic']['error'] === UPLOAD_ERR_OK) {
 
     $safeName = preg_replace('/[^a-zA-Z0-9._-]/', '', $_FILES['pic']['name']);
     $fileName = time() . '_' . $safeName;
-    $objectKey = "tenant/" . $fileName;
 
-    $result = $s3->putObject([
-        'Bucket'      => 'firstbucket',
-        'Key'         => $objectKey,
-        'SourceFile'  => $_FILES['pic']['tmp_name'],
-        'ACL'         => 'public-read',
-        'ContentType' => $_FILES['pic']['type']
-    ]);
+    // Folder path
+    $uploadPath = "tenant/";
 
-    $picUrl = $result['ObjectURL'];
+    $uploaded = ObjectStorageUpload(
+        $uploadPath,
+        $fileName,
+        $_FILES['pic']['tmp_name']
+    );
+
+    if (!$uploaded) {
+        http_response_code(500);
+        echo json_encode([
+            "statusCode" => 500,
+            "message" => "Image upload failed"
+        ]);
+        exit;
+    }
+
+    // Store relative path or full URL (your choice)
+    $picUrl = $uploadPath . $fileName;
 }
+
 
 /* ===========================
    DB Operations
