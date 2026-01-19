@@ -210,6 +210,7 @@ try {
     
             $from = $leaseStart ? "'".db_input($leaseStart)."'" : "NULL";
             $to   = $leaseEnd   ? "'".db_input($leaseEnd)."'"   : "NULL";
+
             $agreementExists = GetXFromYID("
                 SELECT COUNT(*) 
                 FROM agreement 
@@ -230,30 +231,28 @@ try {
     
             } else {
                 $agreementId = NextID('iAgreementID', 'agreement');
+                $now = NOW;
+
     
                 sql_query("
-                    INSERT INTO agreement (
-                        iAgreementID,
-                        iPropertyID,
-                        iTenantID,
-                        iPropertyTypeID,
-                        fAmount,
-                        dFrom,
-                        dTo,
-                        vAgreementDoc,
-                        cStatus
-                    ) VALUES (
-                        $agreementId,
-                        $propId,
-                        $tenantId,
-                        $type,
-                        $monthlyRent,
-                        $from,
-                        $to,
-                        '".db_input($agreementDoc)."',
-                        'A'
-                    )
-                ");
+                INSERT INTO agreement
+                (iAgreementID, dtAgreement, dAgreementDate, iPropertyID,
+                 iUID, iTenantID, iPropertyTypeID, fAmount,
+                 dFrom, dTo, vAgreementDoc)
+                VALUES (
+                    $agreementId,
+                    '$now',
+                    '$now',
+                    $propId,
+                    $userid,
+                    $tenantId,
+                    $type,
+                    $monthlyRent,
+                    $from,
+                    $to,
+                    '".db_input($agreementDoc)."'
+                )
+            ");
             }
         }
     
