@@ -67,9 +67,9 @@ try {
             "propertyType"  => $data['propertyType'],
             "carpetArea"    => (float)$data['carpetArea'],
             "monthlyRent"   => (float)$data['monthlyRent'],
-            "propertyImg"   => $data['propertyImg'],
+            "propertyImg"   => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['propertyImg'],
             "tenantName"    => $data['tenantName'],
-            "tenantImg"     => $data['tenantImg'],
+            "tenantImg"     => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['tenantImg'],
             "invoiceStatus" => (bool)$data['invoiceStatus'],
             "invoiceID"     => isset($data['iInvoiceID']) ? (int)$data['iInvoiceID'] : 0
         ];

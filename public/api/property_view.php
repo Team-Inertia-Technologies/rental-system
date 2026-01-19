@@ -58,13 +58,13 @@ try {
 			"type" => $data['propertyType'],
 			"carpetArea" => (float)$data['carpetArea'],
 			"tenantName" => $data['tenantName'],
-			"tenantImg" => $data['tenantImg'],
+			"tenantImg" => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['tenantImg'],
 			"conPersonName" => $data['vContactPerson'],
 			"conPersonMob" => $data['vContactNo'],
 			"conPersonEmail" => $data['vEmailID'],
 			"LeasePeriod" => date('d/m/Y', strtotime($data['dFrom'])) . " - " . date('d/m/Y', strtotime($data['dTo'])),
 			"monthlyRent" => (float)$data['monthlyRent'],
-			"propertyImg" => $data['propertyImg'],
+			"propertyImg" => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['propertyImg'],
 			"NextIncrement" => $data['fIncValue'],
 			"IncrementFrom" => !empty($data['cIncPeriod']) ? date('M Y', strtotime($data['cIncPeriod'])) : ""		
 		);

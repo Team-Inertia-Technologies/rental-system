@@ -57,7 +57,7 @@ try{
 				"email"          => $row['vPartyEmailID'],
 				"gstNumber"      => $row['vGSTNo'],
 				"panNumer"       => $row['vPanNo'],
-				"tenentImg"      => $row['tenantImg'],
+				"tenentImg"      => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$row['tenantImg'],
 				"contactPerson"  => $row['vContactPerson'],
 				"address"        => $row['vAddress'],
 				"status" => 'Paid',
