@@ -5013,24 +5013,24 @@ function get_mime_content_type($source)
 
 // 	return $S3OBJ;
 // }
-function ObjectStorage()
-{
-    require_once realpath(dirname(__FILE__) . "/libs/aws/aws-autoloader.php");
+// function ObjectStorage()
+// {
+//     require_once realpath(dirname(__FILE__) . "/libs/aws/aws-autoloader.php");
 
-    $S3OBJ = new Aws\S3\S3Client([
-        "region" => AWS_S3_REGION, // usually "blr1"
-        "version" => "latest",
-        "endpoint" => "https://blr1.digitaloceanspaces.com", // ✅ REMOVE BUCKET from endpoint
-        "credentials" => [
-            "key"    => AWS_S3_KEY,
-            "secret" => AWS_S3_SECRET,
-        ],
-        "bucket_endpoint" => false,              // ✅ Must be false
-        "use_path_style_endpoint" => false,      // ✅ Must be false
-    ]);
+//     $S3OBJ = new Aws\S3\S3Client([
+//         "region" => AWS_S3_REGION, // usually "blr1"
+//         "version" => "latest",
+//         "endpoint" => "https://blr1.digitaloceanspaces.com", // ✅ REMOVE BUCKET from endpoint
+//         "credentials" => [
+//             "key"    => AWS_S3_KEY,
+//             "secret" => AWS_S3_SECRET,
+//         ],
+//         "bucket_endpoint" => false,              // ✅ Must be false
+//         "use_path_style_endpoint" => false,      // ✅ Must be false
+//     ]);
 
-    return $S3OBJ;
-}
+//     return $S3OBJ;
+// }
 
 function ObjectStorageUpload($upload_path, $fileName, $sourceFile)
 {
