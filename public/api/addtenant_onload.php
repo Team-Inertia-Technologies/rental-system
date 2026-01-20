@@ -71,7 +71,7 @@ try {
 			exit;
 		}
 
-		$query = "SELECT t.iTenantID, t.vParty, t.vPartyContactNo, t.vPartyEmailID, t.vGSTNo, t.vPanNo, t.vContactPerson, t.iType,
+		$query = "SELECT t.iTenantID, t.vParty, t.vPartyContactNo, t.vPartyEmailID, t.vGSTNo, t.iStateCode, t.vPanNo, t.vContactPerson, t.iType,
 					pt.iPropertyTypeID, pt.vName as propertyTypeName
 					FROM tenant t
 					LEFT JOIN property_type pt ON t.iType = pt.iPropertyTypeID
@@ -88,6 +88,7 @@ try {
 					"mobile" => $tenantData['vPartyContactNo'],
 					"email" => $tenantData['vPartyEmailID'],
 					"gstNumber" => $tenantData['vGSTNo'],
+					"stateCode" => $tenantData['iStateCode'],
 					"panNumber" => $tenantData['vPanNo'],
 					"contactPerson" => db_output2($tenantData['vContactPerson']),
 					"type" => (int)$tenantData['iType'],

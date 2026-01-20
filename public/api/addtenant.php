@@ -29,6 +29,7 @@ $name          = $_POST['name'] ?? '';
 $mobile        = $_POST['mobile'] ?? '';
 $email         = $_POST['email'] ?? '';
 $gstNumber     = $_POST['gstNumber'] ?? '';
+$statecode    = $_POST['statecode'] ?? '';
 $panNumber     = $_POST['panNumber'] ?? '';
 $contactPerson = $_POST['contactPerson'] ?? '';
 $type          = isset($_POST['type']) ? (int)$_POST['type'] : 0;
@@ -122,7 +123,7 @@ try {
         $insertQuery = "
             INSERT INTO tenant (
                 iTenantID, iUID, vParty, vPartyContactNo, vPartyEmailID,
-                vGSTNo, vPanNo, vContactPerson, iType, vPic, cStatus
+                vGSTNo, iStateCode, vPanNo, vContactPerson, iType, vPic, cStatus
             ) VALUES (
                 $Id,
                 $userid,
@@ -130,6 +131,7 @@ try {
                 '" . db_input($mobile) . "',
                 '" . db_input($email) . "',
                 '" . db_input($gstNumber) . "',
+                '" . db_input($statecode) . "',
                 '" . db_input($panNumber) . "',
                 '" . db_input($contactPerson) . "',
                 $type,
@@ -168,6 +170,7 @@ try {
                 vPartyContactNo = '" . db_input($mobile) . "',
                 vPartyEmailID = '" . db_input($email) . "',
                 vGSTNo = '" . db_input($gstNumber) . "',
+                iStateCode = '" . db_input($statecode) . "',
                 vPanNo = '" . db_input($panNumber) . "',
                 vContactPerson = '" . db_input($contactPerson) . "'
                 $picSql
