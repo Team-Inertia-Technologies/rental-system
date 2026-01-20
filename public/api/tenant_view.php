@@ -67,7 +67,7 @@ try{
 		if (!empty($row['iAgreementID'])) {
 			$tenants[$tenantId]['properties'][] = [
 				"id"  => (int)$row['iPropertyID'],
-				"name"=> $row['PropertyName']
+				"name"=> db_output2($row['PropertyName'])
 			];
 		}
 	}

@@ -49,7 +49,8 @@ try{
 		p.iPropertyID,
 		p.vName AS propertyName,
 		t.iTenantID,
-		t.vParty AS tenantName
+		t.vParty AS tenantName,
+		t.iStateCode AS tenantStateCode
 	FROM agreement a
 	JOIN property p ON a.iPropertyID = p.iPropertyID
 	JOIN tenant t ON a.iTenantID = t.iTenantID
@@ -68,8 +69,50 @@ try{
 		]);
 		exit;
 	}
+	
 	$tenantId = (int)$data['iTenantID'];
 	$propertyId = (int)$data['iPropertyID'];
+	$tenantStateCode = (int)$data['tenantStateCode'];
+
+	// Fetch user's state code
+	$userQuery = "SELECT iStateCode FROM user WHERE iUserID = {$_SESSION['USER_ID']} LIMIT 1";
+	$userRes = sql_query($userQuery);
+	$userData = sql_fetch_assoc($userRes);
+	$userStateCode = isset($userData['iStateCode']) ? (int)$userData['iStateCode'] : 0;
+
+	// Calculate GST based on state code matching
+	$rentAmount = (float)$data['fAmount'];
+	$gstRate = 18; // 18% GST
+	$totalGST = round(($rentAmount * $gstRate) / 100, 2);
+	
+	$gstBreakdown = [];
+	
+	if ($tenantStateCode === $userStateCode && $tenantStateCode > 0) {
+		// Same state - Split into CGST and SGST (9% each)
+		$cgst = round($totalGST / 2, 2);
+		$sgst = round($totalGST / 2, 2);
+		
+		$gstBreakdown = [
+			"type" => "intrastate",
+			"labels" => ["CGST", "SGST"],
+			"cgst" => $cgst,
+			"sgst" => $sgst,
+			"igst" => 0,
+			"totalGst" => $cgst + $sgst
+		];
+		
+	} else {
+		// Different states - IGST (18%)
+		$gstBreakdown = [
+			"type" => "interstate",
+			"labels" => ["IGST"],
+			"cgst" => 0,
+			"sgst" => 0,
+			"igst" => $totalGST,
+			"totalGst" => $totalGST
+		];
+		
+	}
 
 	$invoiceCheckQuery = "
 		SELECT iInvoiceID
@@ -87,17 +130,29 @@ try{
 		"invoiceNumber" => $invoiceNumber,
 		"agreementId" => (int)$data['iAgreementID'],
 		"date" => $data['dAgreementDate'],
-		"rent" => (float)$data['fAmount'],
-		"gst" => round(((float)$data['fAmount'] * 18) / 100, 2),
-		"totalAmount" => round(((float)$data['fAmount'] * 118) / 100, 2),
+		"rent" => $rentAmount,
+	
+		"gstType" => $gstBreakdown['type'],
+		"gstLabels" => $gstBreakdown['labels'],
+	
+		"CGST" => $gstBreakdown['cgst'],
+		"SGST" => $gstBreakdown['sgst'],
+		"IGST" => $gstBreakdown['igst'],
+		"totalGst" => $gstBreakdown['totalGst'],
+	
+		"totalAmount" => round($rentAmount + $gstBreakdown['totalGst'], 2),
+	
 		"invoiceperiodFrom" => $data['dFrom'],
 		"invoiceperiodTo" => $data['dTo'],
-		"propId" => (int)$data['iPropertyID'],
+		"propId" => $propertyId,
 		"propertyName" => db_output2($data['propertyName']),
-		"tenantId" => (int)$data['iTenantID'],
+		"tenantId" => $tenantId,
 		"tenantName" => db_output2($data['tenantName']),
+		"tenantStateCode" => $tenantStateCode,
+		"userStateCode" => $userStateCode,
 		"savedraft" => $invoiceExists
 	];
+	
 
 	http_response_code(200);
 	header('Content-Type: application/json');
@@ -120,3 +175,4 @@ try{
     ]);
     exit;
 }
+?>
