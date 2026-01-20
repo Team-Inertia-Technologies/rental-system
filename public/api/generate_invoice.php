@@ -77,7 +77,7 @@ try{
 	$tenantStateCode = (int)$data['tenantStateCode'];
 
 	// Fetch user's state code
-	$userQuery = "SELECT iStateCode FROM user WHERE iUserID = $userID LIMIT 1";
+	$userQuery = "SELECT iStateCode FROM user WHERE iUID = $userID LIMIT 1";
 	$userRes = sql_query($userQuery);
 	$userData = sql_fetch_assoc($userRes);
 	$userStateCode = isset($userData['iStateCode']) ? (int)$userData['iStateCode'] : 0;
