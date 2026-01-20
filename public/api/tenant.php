@@ -24,6 +24,8 @@ if (!$token) {
 	exit;
 }
 
+$userID = DecodeParam($token);
+
 try{
 	$query = "SELECT 
 		t.iTenantID AS tenantId,
@@ -41,7 +43,7 @@ try{
 	FROM tenant t
 	LEFT JOIN agreement a ON a.iTenantID = t.iTenantID
 	LEFT JOIN property p ON p.iPropertyID = a.iPropertyID
-	WHERE t.cStatus = 'A'
+	WHERE t.cStatus = 'A' AND t.iUID = '$userID'
 	";
 
 	$res = sql_query($query);

@@ -31,6 +31,7 @@ $category      = (int)($_POST['category'] ?? 0);
 $type          = (int)($_POST['type'] ?? 0);
 $carpetArea    = (float)($_POST['carpetArea'] ?? 0);
 $builtUpArea   = (float)($_POST['builtUpArea'] ?? 0);
+$amount        = (float)($_POST['amount'] ?? 0);
 $tenantId      = (int)($_POST['tenantId'] ?? 0);
 $monthlyRent   = (float)($_POST['monthlyRent'] ?? 0);
 $leaseStart    = $_POST['leaseStart'] ?? '';
@@ -135,7 +136,7 @@ try {
         sql_query("
             INSERT INTO property
             (iPropertyID, iUID, vName, vAddress, iCategoryID, iPropertyTypeID,
-             fCarpetArea, fBuiltArea, vPic)
+             fCarpetArea, fBuiltArea, fBaseAmount, vPic)
             VALUES (
                 $propId,
                 $userid,
@@ -145,6 +146,7 @@ try {
                 $type,
                 $carpetArea,
                 $builtUpArea,
+                $amount,
                 '".db_input($propertyPic)."'
             )
         ");
@@ -200,7 +202,8 @@ try {
                 iCategoryID=$category,
                 iPropertyTypeID=$type,
                 fCarpetArea=$carpetArea,
-                fBuiltArea=$builtUpArea
+                fBuiltArea=$builtUpArea,
+                fBaseAmount=$amount
                 $picSql
             WHERE iPropertyID=$propId
         ");

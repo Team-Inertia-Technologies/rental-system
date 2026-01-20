@@ -23,6 +23,8 @@ if (!$token) {
     exit;
 }
 
+$userID = DecodeParam($token);
+
 try {
 
     $query = "
@@ -53,6 +55,7 @@ try {
         LEFT JOIN invoice inv
             ON inv.iPropertyID = p.iPropertyID
            AND inv.cStatus = 'A'
+        WHERE p.iUID = '$userID'
         ORDER BY p.iPropertyID ASC
     ";
 

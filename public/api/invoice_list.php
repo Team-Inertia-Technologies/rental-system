@@ -24,6 +24,8 @@ if (!$token) {
 	exit;
 }
 
+$userID = DecodeParam($token);
+
 try {
 	$INVOICE_ARR = [];
 	$query = " SELECT 
@@ -37,6 +39,7 @@ try {
 	FROM invoice i
 	JOIN property p ON i.iPropertyID = p.iPropertyID
 	JOIN tenant t ON i.iTenantID = t.iTenantID
+	WHERE i.iUID = '$userID'
 	ORDER BY i.iInvoiceID ASC
 	";
 	$res = sql_query($query);
