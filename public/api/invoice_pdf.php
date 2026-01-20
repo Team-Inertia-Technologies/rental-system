@@ -74,15 +74,15 @@ try {
     $invoiceDate = $date = date("d-m-Y", strtotime($row->dInvoiceDate));
    
     $billing = [
-        "name"   => $row->vParty,
-        "contact"=> $row->vContactPerson,
+        "name"   => db_output2($row->vParty),
+        "contact"=> db_output2($row->vContactPerson),
         "phone"  => $row->vPartyContactNo,
         "email"  => $row->vPartyEmailID,
         "gst"    => $row->vGSTNo
     ];
 
     $shipping = [
-        "name"   => $row->propertyName,
+        "name"   => db_output2($row->propertyName),
         "addr"   => $row->vAddress,
         "area"   => $row->fCarpetArea
     ];

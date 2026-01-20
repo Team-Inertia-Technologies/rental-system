@@ -31,17 +31,17 @@ try {
 		c.vName AS category,
 		pt.vName AS propertyType,
 		p.fCarpetArea AS carpetArea,
-		p.fBaseAmount AS monthlyRent,
 		p.vPic AS propertyImg,
 		t.vParty AS tenantName,
 		t.vPic AS tenantImg,
 		t.vContactPerson,
-		t.vContactNo,
-		t.vEmailID,
+		t.vPartyContactNo,
+		t.vPartyEmailID,
 		a.dFrom,
 		a.dTo,
 		a.fIncValue,
-		a.cIncPeriod
+		a.cIncPeriod,
+		a.fAmount AS monthlyRent
 	FROM property p
 	JOIN category c ON p.iCategoryID = c.iCategoryID
 	JOIN property_type pt ON p.iPropertyTypeID = pt.iPropertyTypeID
@@ -53,13 +53,13 @@ try {
 	if ($data = sql_fetch_assoc($res)) {
 		$propertyDetails = array(
 			"propId" => (int)$data['id'],
-			"propertyName" => $data['propertyName'],
+			"propertyName" => db_output2($data['propertyName']),
 			"category" => $data['category'],
 			"type" => $data['propertyType'],
 			"carpetArea" => (float)$data['carpetArea'],
-			"tenantName" => $data['tenantName'],
+			"tenantName" => db_output2($data['tenantName']),
 			"tenantImg" => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['tenantImg'],
-			"conPersonName" => $data['vParty'],
+			"conPersonName" => db_output2($data['vContactPerson']),
 			"conPersonMob" => $data['vPartyContactNo'],
 			"conPersonEmail" => $data['vPartyEmailID'],
 			"LeasePeriod" => date('d/m/Y', strtotime($data['dFrom'])) . " - " . date('d/m/Y', strtotime($data['dTo'])),

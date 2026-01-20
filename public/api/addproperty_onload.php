@@ -28,7 +28,7 @@ if (!in_array($mode, ['INSERT', 'UPDATE'])) {
     echo json_encode(["statusCode" => 400, "message" => "Invalid mode"]);
     exit;
 }
-
+$userID = DecodeParam($token);
 try{
 
 	if ($mode === 'INSERT') {
@@ -43,7 +43,7 @@ try{
 			);
 		}
 
-		$tenantquery = "SELECT iTenantID, vParty FROM tenant WHERE cStatus='A' ORDER BY vParty ASC";
+		$tenantquery = "SELECT iTenantID, vParty FROM tenant WHERE cStatus='A' AND iUID = '$userID' ORDER BY vParty ASC";
 		$tenantres = sql_query($tenantquery);
 		$tenants = [];
 		while ($data = sql_fetch_assoc($tenantres)) {
@@ -89,7 +89,7 @@ try{
 			);
 		}
 
-		$tenantquery = "SELECT iTenantID, vParty FROM tenant WHERE cStatus='A' ORDER BY vParty ASC";
+		$tenantquery = "SELECT iTenantID, vParty FROM tenant WHERE cStatus='A' AND iUID = '$userID' ORDER BY vParty ASC";
 		$tenantres = sql_query($tenantquery);
 		$tenants = [];
 		while ($data = sql_fetch_assoc($tenantres)) {
@@ -147,7 +147,7 @@ try{
 			"data" => array(
 				"propertyDetails" => array(
 					"propId" => (int)$propertyData['id'],
-					"name" => $propertyData['propertyName'],
+					"name" => db_output2($propertyData['propertyName']),
 					"address" => $propertyData['address'],
 					"category" => (int)$propertyData['categoryId'],
 					"type" => (int)$propertyData['typeId'],
@@ -155,7 +155,7 @@ try{
 					"builtUpArea" => (float)$propertyData['builtUpArea'],
 					"amount" => (float)$propertyData['baseAmount'],
 					"tenantId" => (int)$propertyData['iTenantID'],
-					"tenantName" => $propertyData['vParty'],
+					"tenantName" => db_output2($propertyData['vParty']),
 					"monthlyRent" => (float)$propertyData['fAmount'],
 					"leaseStart" => $propertyData['dFrom'],
 					"leaseEnd" => $propertyData['dTo'],

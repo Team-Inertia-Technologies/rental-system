@@ -84,12 +84,12 @@ try {
 			"data" => array(
 				"tenantData" => array(
 					"tenantId" => (int)$tenantData['iTenantID'],
-					"name" => $tenantData['vParty'],
+					"name" => db_output2($tenantData['vParty']),
 					"mobile" => $tenantData['vPartyContactNo'],
 					"email" => $tenantData['vPartyEmailID'],
 					"gstNumber" => $tenantData['vGSTNo'],
 					"panNumber" => $tenantData['vPanNo'],
-					"contactPerson" => $tenantData['vContactPerson'],
+					"contactPerson" => db_output2($tenantData['vContactPerson']),
 					"type" => (int)$tenantData['iType'],
 					"propertyTypeName" => $tenantData['propertyTypeName'],
 				),

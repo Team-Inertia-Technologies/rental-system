@@ -93,9 +93,9 @@ try{
 		"invoiceperiodFrom" => $data['dFrom'],
 		"invoiceperiodTo" => $data['dTo'],
 		"propId" => (int)$data['iPropertyID'],
-		"propertyName" => $data['propertyName'],
+		"propertyName" => db_output2($data['propertyName']),
 		"tenantId" => (int)$data['iTenantID'],
-		"tenantName" => $data['tenantName'],
+		"tenantName" => db_output2($data['tenantName']),
 		"savedraft" => $invoiceExists
 	];
 

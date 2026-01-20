@@ -65,13 +65,13 @@ try {
     while ($data = sql_fetch_assoc($res)) {
         $properties[] = [
             "propId"        => (int)$data['id'],
-            "propertyName"  => $data['propertyName'],
+            "propertyName"  => db_output2($data['propertyName']),
             "category"      => $data['category'],
             "propertyType"  => $data['propertyType'],
             "carpetArea"    => (float)$data['carpetArea'],
             "monthlyRent"   => (float)$data['monthlyRent'],
             "propertyImg"   => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['propertyImg'],
-            "tenantName"    => $data['tenantName'],
+            "tenantName"    => db_output2($data['tenantName']),
             "tenantImg"     => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['tenantImg'],
             "invoiceStatus" => (bool)$data['invoiceStatus'],
             "invoiceID"     => isset($data['iInvoiceID']) ? (int)$data['iInvoiceID'] : 0

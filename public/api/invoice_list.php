@@ -63,8 +63,8 @@ try {
 			"total" => (float)$data['totalAmount'],
 			"status" => $status,
 			"statusText" => $data['status'],
-			"propertyName" => $data['propertyName'],
-			"tenantName" => $data['tenantName'],
+			"propertyName" => db_output2($data['propertyName']),
+			"tenantName" => db_output2($data['tenantName'])
 		);
 	}
 

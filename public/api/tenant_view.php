@@ -52,13 +52,13 @@ try{
 		if (!isset($tenants[$tenantId])) {
 			$tenants[$tenantId] = [
 				"tenantId"       => $tenantId,
-				"name"           => $row['tenantName'],
+				"name"           => db_output2($row['tenantName']),
 				"mobile"         => $row['vPartyContactNo'],
 				"email"          => $row['vPartyEmailID'],
 				"gstNumber"      => $row['vGSTNo'],
 				"panNumer"       => $row['vPanNo'],
 				"tenentImg"      => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$row['tenantImg'],
-				"contactPerson"  => $row['vContactPerson'],
+				"contactPerson"  => db_output2($row['vContactPerson']),
 				"properties"     => [],
 				"type"=> 1
 			];
