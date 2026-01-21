@@ -33,6 +33,7 @@ try {
             i.fValue,
             i.fCGST,
             i.fSGST,
+            i.fIGST,
             i.fTotal,
 
             t.vParty,
@@ -88,8 +89,14 @@ try {
     ];
 
     $amount   = (float)$row->fValue;
-    $cgst     = $row->fCGST;
-    $total    = $row->fTotal;
+    $cgst     = (float)$row->fCGST;
+    $sgst     = (float)$row->fSGST;
+    $igst     = (float)$row->fIGST;
+    $total    = (float)$row->fTotal;
+
+    // Determine if intrastate or interstate
+    $isIntrastate = ($cgst > 0 && $sgst > 0);
+    $isInterstate = ($igst > 0);
 
     /* ---------------------------
        HTML INVOICE
@@ -109,9 +116,9 @@ try {
 
     <table class="header">
         <tr>
-            <td><div style="width:5px;height:5px;background:#eee;text-align:center;">
-            <img src="../uploads/ManMyRent.png" alt="Company Logo">
-            </div></td>
+            <td style="width:120px;">
+                <img src="../uploads/ManMyRent.png" alt="Company Logo" style="width:100px; height:auto;">
+            </td>
             <td class="title">TAX INVOICE</td>
         </tr>
     </table>
@@ -165,11 +172,11 @@ try {
         <tbody>
             <tr>
                 <td>1</td>
-                <td> Rent for '. date("F Y", strtotime($invoiceDate)) .'</td>
+                <td>Rent for '. date("F Y", strtotime($invoiceDate)) .'</td>
                 <td>997212</td>
                 <td>1</td>
-                <td class="right">'.number_format($amount).'</td>
-                <td class="right">'.number_format($amount).'</td>
+                <td class="right">'.number_format($amount, 2).'</td>
+                <td class="right">'.number_format($amount, 2).'</td>
             </tr>
         </tbody>
     </table>
@@ -184,10 +191,19 @@ try {
             </td>
             <td width="40%">
                 <table>
-                    <tr><td>Subtotal</td><td class="right">'.number_format($amount).'</td></tr>
-                    <tr><td>CGST @9%</td><td class="right">'.number_format($cgst).'</td></tr>
-                    <tr><td>SGST @9%</td><td class="right">'.number_format($sgst).'</td></tr>
-                    <tr class="total"><td>Total</td><td class="right">'.number_format($total).'</td></tr>
+                    <tr><td>Subtotal</td><td class="right">'.number_format($amount, 2).'</td></tr>';
+                    
+    if ($isIntrastate) {
+        $html .= '
+                    <tr><td>CGST @9%</td><td class="right">'.number_format($cgst, 2).'</td></tr>
+                    <tr><td>SGST @9%</td><td class="right">'.number_format($sgst, 2).'</td></tr>';
+    } elseif ($isInterstate) {
+        $html .= '
+                    <tr><td>IGST @18%</td><td class="right">'.number_format($igst, 2).'</td></tr>';
+    }
+    
+    $html .= '
+                    <tr class="total"><td>Total</td><td class="right">'.number_format($total, 2).'</td></tr>
                 </table>
             </td>
         </tr>
@@ -227,7 +243,7 @@ try {
     echo json_encode([
         "statusCode" => 200,
         "message" => "Invoice generated successfully",
-        "fileName" => "Invoice.pdf",
+        "fileName" => "Invoice_".$invoiceNo.".pdf",
         "pdf" => base64_encode($pdfContent)
     ]);
     exit;
@@ -241,3 +257,4 @@ try {
     ]);
     exit;
 }
+?>
