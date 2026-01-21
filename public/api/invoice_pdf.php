@@ -109,7 +109,7 @@ try {
 
     <table class="header">
         <tr>
-            <td><div style="width:120px;height:60px;background:#eee;text-align:center;line-height:60px;">
+            <td><div style="width:50px;height:10px;background:#eee;text-align:center;line-height:10px;">
             <img src="../uploads/ManMyRent.png" alt="Company Logo">
             </div></td>
             <td class="title">TAX INVOICE</td>
