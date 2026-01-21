@@ -27,6 +27,7 @@ $address = $_POST['address'] ?? '';
 $companyName = $_POST['companyName'] ?? '';
 $companyPan = $_POST['companyPan'] ?? '';
 $companyGST = $_POST['companyGST'] ?? '';
+$isUpdated = $_POST['isUpdated'] ?? '';
 
 
 if (!$token) {
@@ -115,7 +116,7 @@ try{
 	if ($companyGST !== '') {
 		$updateFields[] = "vCompanyGST = '" . db_input($companyGST) . "'";
 	}
-	if ($picUrl !== '') {
+	if ($isUpdated === true || $isUpdated === 'true') {
 		$updateFields[] = "vPic = '" . db_input($picUrl) . "'";
 	}
 
