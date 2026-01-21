@@ -3,7 +3,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 $NO_REDIRECT = $NO_PRELOAD = 1;
 include "../includes/common_api.php";
-
 header('Content-Type: application/json');
 
 $postdata = file_get_contents("php://input");
@@ -26,6 +25,20 @@ if (!$token) {
 }
 
 $userID = DecodeParam($token);
+
+function getFinancialYear() {
+    $year = date('Y');
+    $month = date('n');
+    if ($month >= 4) {
+        return $year . "-" . substr($year + 1, -2);
+    } else {
+        return ($year - 1) . "-" . substr($year, -2);
+    }
+}
+$financialYear = getFinancialYear();
+
+$fyLike = "R/$financialYear/%";
+$lastInvoice = GetXFromYID("SELECT vInvoiceNo FROM invoice WHERE vInvoiceNo LIKE '$fyLike'ORDER BY iInvoiceID DESC LIMIT 1 ");
 
 try{
 
@@ -127,7 +140,17 @@ try{
 	$invoiceCheckRes = sql_query($invoiceCheckQuery);
 	$invoiceExists = (sql_num_rows($invoiceCheckRes) > 0);
 
-	$invoiceNumber = "INV-" . date('Y') . "-" . rand(100000, 999999);
+	if ($lastInvoice) {
+		// Extract last number (001, 002 etc)
+		$lastNumber = (int) substr($lastInvoice, -3);
+		$nextNumber = $lastNumber + 1;
+	} else {
+		// First invoice of the financial year
+		$nextNumber = 1;
+	}
+	
+	$runningNo = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+	$invoiceNumber = "R/$financialYear/$runningNo";
 	$invoice = [
 		"invoiceNumber" => $invoiceNumber,
 		"agreementId" => (int)$data['iAgreementID'],
