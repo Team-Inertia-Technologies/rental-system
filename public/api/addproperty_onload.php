@@ -123,7 +123,6 @@ try{
 			p.vName AS propertyName,
 			p.vAddress AS address,
 			c.iCategoryID AS categoryId,
-			pt.iPropertyTypeID AS typeId,
 			p.fCarpetArea AS carpetArea,
 			p.fBuiltArea AS builtUpArea,
 			p.fBaseAmount AS baseAmount,
@@ -135,7 +134,6 @@ try{
 			t.vParty
 		FROM property p
 		JOIN category c ON p.iCategoryID = c.iCategoryID
-		JOIN property_type pt ON p.iPropertyTypeID = pt.iPropertyTypeID
 		LEFT JOIN agreement a ON a.iPropertyID = p.iPropertyID
 		LEFT JOIN tenant t ON t.iTenantID = a.iTenantID
 		WHERE p.iPropertyID = $propId
@@ -150,7 +148,6 @@ try{
 					"name" => db_output2($propertyData['propertyName']),
 					"address" => $propertyData['address'],
 					"category" => (int)$propertyData['categoryId'],
-					"type" => (int)$propertyData['typeId'],
 					"carpetArea" => (float)$propertyData['carpetArea'],
 					"builtUpArea" => (float)$propertyData['builtUpArea'],
 					"amount" => (float)$propertyData['baseAmount'],
