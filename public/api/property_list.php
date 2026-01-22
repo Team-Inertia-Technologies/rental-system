@@ -32,7 +32,6 @@ try {
             p.iPropertyID AS id,
             p.vName AS propertyName,
             c.vName AS category,
-            pt.vName AS propertyType,
             p.fCarpetArea AS carpetArea,
             p.fBaseAmount AS monthlyRent,
             p.vPic AS propertyImg,
@@ -45,7 +44,6 @@ try {
             END AS invoiceStatus
         FROM property p
         JOIN category c ON p.iCategoryID = c.iCategoryID
-        JOIN property_type pt ON p.iPropertyTypeID = pt.iPropertyTypeID
         LEFT JOIN agreement a 
             ON a.iPropertyID = p.iPropertyID 
            AND a.cStatus = 'A'
