@@ -65,7 +65,6 @@ try {
             "propId"        => (int)$data['id'],
             "propertyName"  => db_output2($data['propertyName']),
             "category"      => $data['category'],
-            "propertyType"  => $data['propertyType'],
             "carpetArea"    => (float)$data['carpetArea'],
             "monthlyRent"   => (float)$data['monthlyRent'],
             "propertyImg"   => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['propertyImg'],

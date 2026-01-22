@@ -29,7 +29,6 @@ try {
 		p.iPropertyID AS id,
 		p.vName AS propertyName,
 		c.vName AS category,
-		pt.vName AS propertyType,
 		p.fCarpetArea AS carpetArea,
 		p.vPic AS propertyImg,
 		t.vParty AS tenantName,
@@ -44,7 +43,6 @@ try {
 		a.fAmount AS monthlyRent
 	FROM property p
 	JOIN category c ON p.iCategoryID = c.iCategoryID
-	JOIN property_type pt ON p.iPropertyTypeID = pt.iPropertyTypeID
 	LEFT JOIN agreement a ON a.iPropertyID = p.iPropertyID AND a.cStatus = 'A'
 	LEFT JOIN tenant t ON t.iTenantID = a.iTenantID AND t.cStatus = 'A'
 	WHERE p.iPropertyID = $propId
@@ -55,7 +53,6 @@ try {
 			"propId" => (int)$data['id'],
 			"propertyName" => db_output2($data['propertyName']),
 			"category" => $data['category'],
-			"type" => $data['propertyType'],
 			"carpetArea" => (float)$data['carpetArea'],
 			"tenantName" => db_output2($data['tenantName']),
 			"tenantImg" => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['tenantImg'],
