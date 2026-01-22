@@ -36,7 +36,6 @@ try {
 		i.vPayStatus AS status,
 		p.vName AS propertyName,
 		c.vName AS category,
-        pt.vName AS propertyType,
 		t.vParty AS tenantName,
 		t.vPartyContactNo,
 		t.vPartyEmailID,
@@ -44,7 +43,6 @@ try {
 	FROM invoice i
 	JOIN property p ON i.iPropertyID = p.iPropertyID
 	JOIN category c ON p.iCategoryID = c.iCategoryID
-	JOIN property_type pt ON p.iPropertyTypeID = pt.iPropertyTypeID
 	JOIN tenant t ON i.iTenantID = t.iTenantID
 	WHERE i.iInvoiceID = $invoiceId
 	";
@@ -63,7 +61,6 @@ try {
 			"statusText" => $data['status'],
 			"propertyName" => db_output2($data['propertyName']),
 			"category" => $data['category'],
-			"propertyType" => $data['propertyType'],
 			"tenantName" => db_output2($data['tenantName']),
 			"tenantContactNo" => $data['vPartyContactNo'],
 			"tenantEmail" => $data['vPartyEmailID'],
