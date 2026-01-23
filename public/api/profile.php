@@ -38,17 +38,17 @@ try {
 	$profile = null;
 	if ($row = sql_fetch_assoc($res)) {
 		$profile = [
-			"name"           => db_output2($row['vName']),
-			"email"          => $row['vEmailID'],
-			"mobile"         => $row['vContactNo'],
-			"address"        => db_output2($row['vAddress']),
-			"companyName"    => db_output2($row['vCompanyName']),
-			"companyPan"     => $row['vCompanyPan'],
-			"companyGST"     => $row['vCompanyGST'],
-			"properties"    => $properties,
-			"tenants"       => $tenants,
-			"invoices"      => $invoices,
-			"pic"         => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$row['vPic']
+			"name"        => db_output2($row['vName'] ?? ''),
+			"email"       => $row['vEmailID'] ?? '',
+			"mobile"      => $row['vContactNo'] ?? '',
+			"address"     => db_output2($row['vAddress'] ?? ''),
+			"companyName" => db_output2($row['vCompanyName'] ?? ''),
+			"companyPan"  => $row['vCompanyPan'] ?? '',
+			"companyGST"  => $row['vCompanyGST'] ?? '',
+			"properties"  => $properties,
+			"tenants"     => $tenants,
+			"invoices"    => $invoices,
+			"pic"         => !empty($row['vPic']) ? 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/' . $row['vPic'] : ''
 		];
 	}
 
