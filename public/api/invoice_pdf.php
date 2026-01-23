@@ -44,11 +44,26 @@ try {
 
             p.vName AS propertyName,
             p.vAddress,
-            p.fCarpetArea
+            p.fCarpetArea,
+            
+            u.vName AS ownerName,
+            u.vAccountName,
+            u.vContactNo,
+            u.vEmailID,
+            u.vAddress as ownerAddress,
+            u.vCompanyGST,
+            u.iStateCode,
+            u.vState,
+            u.vBankName,
+            u.vAccountNo,
+            u.vIFSC,
+            u.vBranch,
+            u.vCompanyPan
 
         FROM invoice i
         JOIN tenant t   ON i.iTenantID   = t.iTenantID
         JOIN property p ON i.iPropertyID = p.iPropertyID
+        LEFT JOIN user u ON u.iUID = i.iUID
         WHERE i.iPropertyID = $propId
         LIMIT 1
         ";
@@ -82,10 +97,14 @@ try {
         "gst"    => $row->vGSTNo
     ];
 
-    $shipping = [
-        "name"   => db_output2($row->propertyName),
-        "addr"   => $row->vAddress,
-        "area"   => $row->fCarpetArea
+    
+    $bankDetails = [
+        "ownerName" => db_output2($row->vAccountName ?? ''),
+        "bankName"  => db_output2($row->vBankName ?? ''),
+        "accountNo" => $row->vAccountNo ?? '',
+        "ifsc"      => $row->vIFSC ?? '',
+        "branch"    => db_output2($row->vBranch ?? ''),
+        "pan"       => $row->vCompanyPan ?? ''
     ];
 
     $amount   = (float)$row->fValue;
@@ -97,6 +116,57 @@ try {
     // Determine if intrastate or interstate
     $isIntrastate = ($cgst > 0 && $sgst > 0);
     $isInterstate = ($igst > 0);
+
+    // Convert amount to words (you can use a library or function)
+    // For now, using a placeholder - you should implement proper number to words conversion
+    function convertNumberToWords($number) {
+        $ones = array(
+            0 => '', 1 => 'One', 2 => 'Two', 3 => 'Three', 4 => 'Four', 5 => 'Five',
+            6 => 'Six', 7 => 'Seven', 8 => 'Eight', 9 => 'Nine', 10 => 'Ten',
+            11 => 'Eleven', 12 => 'Twelve', 13 => 'Thirteen', 14 => 'Fourteen', 15 => 'Fifteen',
+            16 => 'Sixteen', 17 => 'Seventeen', 18 => 'Eighteen', 19 => 'Nineteen'
+        );
+        $tens = array(
+            0 => '', 2 => 'Twenty', 3 => 'Thirty', 4 => 'Forty', 5 => 'Fifty',
+            6 => 'Sixty', 7 => 'Seventy', 8 => 'Eighty', 9 => 'Ninety'
+        );
+        $hundreds = array('', 'Thousand', 'Lakh', 'Crore');
+        
+        $number = number_format($number, 2, '.', '');
+        list($integer, $decimal) = explode('.', $number);
+        $integer = (int)$integer;
+        
+        if ($integer == 0) return 'Zero Rupees Only';
+        
+        $words = array();
+        $crore = floor($integer / 10000000);
+        $integer %= 10000000;
+        $lakh = floor($integer / 100000);
+        $integer %= 100000;
+        $thousand = floor($integer / 1000);
+        $integer %= 1000;
+        $hundred = floor($integer / 100);
+        $integer %= 100;
+        
+        if ($crore) $words[] = convertNumberToWords($crore) . ' Crore';
+        if ($lakh) $words[] = convertNumberToWords($lakh) . ' Lakh';
+        if ($thousand) $words[] = convertNumberToWords($thousand) . ' Thousand';
+        if ($hundred) $words[] = $ones[$hundred] . ' Hundred';
+        
+        if ($integer > 0) {
+            if ($integer < 20) {
+                $words[] = $ones[$integer];
+            } else {
+                $tensDigit = floor($integer / 10);
+                $onesDigit = $integer % 10;
+                $words[] = $tens[$tensDigit] . ($onesDigit ? ' ' . $ones[$onesDigit] : '');
+            }
+        }
+        
+        return implode(' ', $words) . ' Rupees Only';
+    }
+    
+    $amountInWords = convertNumberToWords($total);
 
     /* ---------------------------
        HTML INVOICE
@@ -140,7 +210,7 @@ try {
     <table>
         <tr>
             <td class="box" width="50%">
-                <strong style="color:#0077c8">Tenant Details</strong><br><br>
+                <strong style="color:#0077c8">Party</strong><br><br>
                 <strong>'.$billing['name'].'</strong><br>
                 Contact: '.$billing['contact'].'<br>
                 '.$billing['phone'].'<br>
@@ -148,10 +218,13 @@ try {
                 GSTIN: '.$billing['gst'].'
             </td>
             <td class="box" width="50%">
-                <strong style="color:#0077c8">Property Details</strong><br><br>
-                <strong>'.$shipping['name'].'</strong><br>
-                '.$shipping['addr'].'<br>
-                Carpet Area: '.$shipping['area'].'
+                <strong style="color:#0077c8">Biller</strong><br><br>
+                <strong>'.$bankDetails['ownerName'].'</strong><br>
+                '.$bankDetails['ownerAddress'].'<br>
+                Tel No: '.$bankDetails['vContactNo'].'<br>
+                GSTIN/UIN: '.$bankDetails['vCompanyGST'].'<br>
+                State Name : '.$bankDetails['vState'].', Code: '.$bankDetails['iStateCode'].'<br>
+                E-Mail: '.$bankDetails['vEmailID'].'
             </td>
         </tr>
     </table>
@@ -185,9 +258,12 @@ try {
 
     <table>
         <tr>
-            <td width="60%">
+            <td width="60%" style="vertical-align: top;">
                 <strong>Amount in Words:</strong><br>
-                Fifty Nine Thousand Rupees Only
+                <strong style="color:#0077c8;">INR '.$amountInWords.'</strong>
+                <br><br>
+                <strong>Remarks:</strong><br>
+                Rent for the month of '. date("F Y", strtotime($invoiceDate)) .'
             </td>
             <td width="40%">
                 <table>
@@ -203,7 +279,7 @@ try {
     }
     
     $html .= '
-                    <tr class="total"><td>Total</td><td class="right">'.number_format($total, 2).'</td></tr>
+                    <tr class="total"><td>Total</td><td class="right">₹ '.number_format($total, 2).'</td></tr>
                 </table>
             </td>
         </tr>
@@ -211,6 +287,25 @@ try {
 
     <br>
 
+    <table>
+        <tr>
+            <td width="50%" style="vertical-align: top;">
+                <strong>Tax Amount (in words):</strong><br>
+                <strong style="color:#0077c8;">INR</strong>
+                <br><br>
+                <strong>Company\'s Bank Details</strong><br>
+                A/c Holder\'s Name: <strong>'.$bankDetails['ownerName'].'</strong><br>
+                Bank Name: '.$bankDetails['bankName'].'<br>
+                A/c No.: '.$bankDetails['accountNo'].'<br>
+                Branch & IFS Code: '.$bankDetails['branch'].' - '.$bankDetails['ifsc'].'
+            </td>
+            <td width="50%" style="vertical-align: top;">
+                <strong>Company\'s PAN:</strong> '.$bankDetails['pan'].'
+            </td>
+        </tr>
+    </table>
+
+    <br>
 
     <strong>Terms & Conditions:</strong>
     <ol>
@@ -222,8 +317,11 @@ try {
     <br><br>
 
     <div style="text-align:right">
-        For Rental System<br><br><br>
-        Authorized Signatory
+        <strong>Authorised Signatory</strong>
+    </div>
+    
+    <div style="text-align:center; margin-top:20px; font-size:10px;">
+        This is a Computer Generated Invoice
     </div>
     ';
 
