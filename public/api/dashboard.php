@@ -34,6 +34,7 @@ try {
             c.vName AS category,
             p.fCarpetArea AS carpetArea,
             p.fBaseAmount AS monthlyRent,
+            a.fAmount AS agreedRent,
             p.vPic AS propertyImg,
             t.vParty AS tenantName,
             t.vPic AS tenantImg,
