@@ -99,12 +99,21 @@ try {
 
     
     $bankDetails = [
-        "ownerName" => db_output2($row->vAccountName ?? ''),
+        "ownerName" => db_output2($row->ownerName ?? ''),
         "bankName"  => db_output2($row->vBankName ?? ''),
         "accountNo" => $row->vAccountNo ?? '',
         "ifsc"      => $row->vIFSC ?? '',
         "branch"    => db_output2($row->vBranch ?? ''),
-        "pan"       => $row->vCompanyPan ?? ''
+        "pan"       => $row->vCompanyPan ?? '',
+        "ownerAddress" => db_output2($row->ownerAddress ?? ''),
+        "ContactNo"   => $row->vContactNo ?? '',
+        "CompanyGST"  => $row->vCompanyGST ?? '',
+        "State"       => db_output2($row->vState ?? ''),
+        "StateCode"   => $row->iStateCode ?? '',
+        "EmailID"    => $row->vEmailID ?? '',
+        "AccountName"  => db_output2($row->vAccountName ?? '')
+
+
     ];
 
     $amount   = (float)$row->fValue;
@@ -221,10 +230,10 @@ try {
                 <strong style="color:#0077c8">Biller</strong><br><br>
                 <strong>'.$bankDetails['ownerName'].'</strong><br>
                 '.$bankDetails['ownerAddress'].'<br>
-                Tel No: '.$bankDetails['vContactNo'].'<br>
-                GSTIN/UIN: '.$bankDetails['vCompanyGST'].'<br>
-                State Name : '.$bankDetails['vState'].', Code: '.$bankDetails['iStateCode'].'<br>
-                E-Mail: '.$bankDetails['vEmailID'].'
+                Tel No: '.$bankDetails['ContactNo'].'<br>
+                GSTIN/UIN: '.$bankDetails['CompanyGST'].'<br>
+                State Name : '.$bankDetails['State'].', Code: '.$bankDetails['StateCode'].'<br>
+                E-Mail: '.$bankDetails['EmailID'].'
             </td>
         </tr>
     </table>
@@ -260,7 +269,7 @@ try {
         <tr>
             <td width="60%" style="vertical-align: top;">
                 <strong>Amount in Words:</strong><br>
-                <strong style="color:#0077c8;">INR '.$amountInWords.'</strong>
+                <strong style="color:#0077c8;">'.$amountInWords.'</strong>
                 <br><br>
                 <strong>Remarks:</strong><br>
                 Rent for the month of '. date("F Y", strtotime($invoiceDate)) .'
@@ -290,11 +299,8 @@ try {
     <table>
         <tr>
             <td width="50%" style="vertical-align: top;">
-                <strong>Tax Amount (in words):</strong><br>
-                <strong style="color:#0077c8;">INR</strong>
-                <br><br>
                 <strong>Company\'s Bank Details</strong><br>
-                A/c Holder\'s Name: <strong>'.$bankDetails['ownerName'].'</strong><br>
+                A/c Holder\'s Name: <strong>'.$bankDetails['AccountName'].'</strong><br>
                 Bank Name: '.$bankDetails['bankName'].'<br>
                 A/c No.: '.$bankDetails['accountNo'].'<br>
                 Branch & IFS Code: '.$bankDetails['branch'].' - '.$bankDetails['ifsc'].'
