@@ -68,6 +68,7 @@ try {
             "category"      => $data['category'],
             "carpetArea"    => (float)$data['carpetArea'],
             "monthlyRent"   => (float)$data['monthlyRent'],
+            "agreedRent"    => (float)$data['agreedRent'],
             "propertyImg"   => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['propertyImg'],
             "tenantName"    => db_output2($data['tenantName']),
             "tenantImg"     => 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/'.$data['tenantImg'],
