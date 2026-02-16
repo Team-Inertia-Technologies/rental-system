@@ -156,7 +156,7 @@ try{
 					"monthlyRent" => (float)$propertyData['fAmount'],
 					"leaseStart" => $propertyData['dFrom'],
 					"leaseEnd" => $propertyData['dTo'],
-					"agreementdoc" => $propertyData['vAgreementDoc'],
+					"agreementdoc" => !empty($propertyData['vAgreementDoc']) ? 'https://ti-stage-projects-minio.krjqe5.easypanel.host/firstbucket/' . $propertyData['vAgreementDoc'] : ''
 				),
 				"categoryArr" => $categories,
 				"tenantArr" => $tenants,
